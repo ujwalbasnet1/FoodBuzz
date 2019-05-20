@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_buzz/ImageUpload.dart';
 import 'package:food_buzz/UIs/Entrypage.dart';
 
 void main() => runApp(MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.grey,
       ),
       home: Scaffold(
-          backgroundColor: Colors.white, body: SafeArea(child: EntryPage())),
+          backgroundColor: Colors.white, body: SafeArea(child: ImageUpload())),
     );
   }
 }
