@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_buzz/UIs/Loginpage.dart';
 import 'package:food_buzz/UIs/Restaurantprofile.dart';
 
 class EntryPage extends StatelessWidget {
@@ -48,7 +49,9 @@ class EntryPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => RestaurantProfile()));
+                            builder: (context) => LoginPage(
+                                  isRestaurant: true,
+                                )));
                   },
                 ),
               ),
@@ -77,8 +80,12 @@ class EntryPage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Container()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => LoginPage(
+                                  isRestaurant: false,
+                                )));
                   },
                 ),
               ),

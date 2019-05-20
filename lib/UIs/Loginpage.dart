@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_buzz/UIs/Restaurantprofile.dart';
 
 class LoginPage extends StatelessWidget {
   bool isRestaurant;
@@ -7,16 +8,18 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          SizedBox(height: 50),
-          Image.asset(
-            'assets/images/foodbuzz.jpg',
-            width: 200,
-          ),
-          _LoginForm(isRestaurant: isRestaurant),
-        ],
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            SizedBox(height: 50),
+            Image.asset(
+              'assets/images/foodbuzz.jpg',
+              width: 200,
+            ),
+            _LoginForm(isRestaurant: isRestaurant),
+          ],
+        ),
       ),
     );
   }
@@ -120,7 +123,15 @@ class __LoginformState extends State<_LoginForm> {
                 textColor: Colors.white,
                 color: Color(0XFFD22030),
                 child: Text('Log In'),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    if (widget.isRestaurant)
+                      return RestaurantProfile();
+                    else
+                      return Container(
+                          color: Colors.red, width: 200, height: 200);
+                  }));
+                },
               ),
             ),
             Row(
