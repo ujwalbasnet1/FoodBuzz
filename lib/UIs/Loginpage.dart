@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:food_buzz/UIs/Restaurantprofile.dart';
+import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
+import 'package:food_buzz/Blocs/Login/LoginBloc.dart';
+import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantRepo.dart';
 
 class LoginPage extends StatelessWidget {
-  bool isRestaurant;
+  final bool isRestaurant;
+  final RestaurantRepo restaurantRepo;
 
-  LoginPage({this.isRestaurant = false});
+  LoginPage({this.isRestaurant = false, @required this.restaurantRepo});
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +29,123 @@ class LoginPage extends StatelessWidget {
 }
 
 class _LoginForm extends StatefulWidget {
-  bool isRestaurant;
+  final bool isRestaurant;
+  final RestaurantRepo restaurantRepo;
 
-  _LoginForm({@required this.isRestaurant});
+  _LoginForm({@required this.isRestaurant, @required this.restaurantRepo});
 
   @override
   __LoginformState createState() => __LoginformState();
 }
 
 class __LoginformState extends State<_LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  LoginBloc _loginBloc;
+  AuthenticationBloc _authenticationBloc;
+
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    _authenticationBloc =
+        AuthenticationBloc(restaurantRepo: widget.restaurantRepo);
+    _loginBloc = LoginBloc(
+      restaurantRepository: widget.restaurantRepo,
+      authenticationBloc: _authenticationBloc,
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _loginBloc.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String _text = (widget.isRestaurant) ? 'Restaurant Id' : 'Email';
+
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              TextFormField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(
+                        color: Colors.black54,
+                      )),
+                  hintText: _text,
+                ),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: BorderSide(
+                        color: Colors.black54,
+                      )),
+                  hintText: 'Password',
+                ),
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                child: RaisedButton(
+                  padding: EdgeInsets.symmetric(horizontal: 0, vertical: 14),
+                  textColor: Colors.white,
+                  color: Color(0XFFD22030),
+                  child: Text('Log In'),
+                  onPressed: () {
+                    // dispatch
+                  },
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Forgot your login details?',
+                    style: TextStyle(fontSize: 12, color: Colors.black38),
+                  ),
+                  FlatButton(
+                    padding: EdgeInsets.all(0),
+                    child: Text(
+                      ' Get help signing in',
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {},
+                  )
+                ],
+              ),
+              _buildBottomSection(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBottomSection() {
     if (!widget.isRestaurant) {
       return Column(
@@ -76,85 +187,5 @@ class __LoginformState extends State<_LoginForm> {
     } else {
       return Container();
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String _text = (widget.isRestaurant) ? 'Restaurant Id' : 'Email';
-
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(
-                      color: Colors.black54,
-                    )),
-                hintText: _text,
-              ),
-            ),
-            SizedBox(height: 20),
-            TextFormField(
-              obscureText: true,
-              decoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(
-                      color: Colors.black54,
-                    )),
-                hintText: 'Password',
-              ),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: RaisedButton(
-                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 14),
-                textColor: Colors.white,
-                color: Color(0XFFD22030),
-                child: Text('Log In'),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    if (widget.isRestaurant)
-                      return RestaurantProfile();
-                    else
-                      return Container(
-                          color: Colors.red, width: 200, height: 200);
-                  }));
-                },
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Forgot your login details?',
-                  style: TextStyle(fontSize: 12, color: Colors.black38),
-                ),
-                FlatButton(
-                  padding: EdgeInsets.all(0),
-                  child: Text(
-                    ' Get help signing in',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () {},
-                )
-              ],
-            ),
-            _buildBottomSection(),
-          ],
-        ),
-      ),
-    );
   }
 }

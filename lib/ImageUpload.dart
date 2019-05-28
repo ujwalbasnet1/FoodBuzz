@@ -35,7 +35,6 @@ class _ImageUploadState extends State<ImageUpload>
           options: Options(
               method: 'POST',
               responseType: ResponseType.json // or ResponseType.JSON
-
               ),
           onSendProgress: (int sent, int total) {
             setState(() {
