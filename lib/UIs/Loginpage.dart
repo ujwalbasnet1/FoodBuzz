@@ -12,11 +12,10 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.yellow,
-      body: ListView(
+    return SingleChildScrollView(
+      child: Column(
         children: <Widget>[
-          // SizedBox(height: 50),
+          SizedBox(height: 50),
           Image.asset(
             'assets/images/foodbuzz.jpg',
             width: 200,
@@ -75,7 +74,6 @@ class __LoginformState extends State<_LoginForm> {
     String _text = (widget.isRestaurant) ? 'Restaurant Id' : 'Email';
 
     return Container(
-      color: Colors.green,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(

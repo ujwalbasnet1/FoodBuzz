@@ -107,9 +107,11 @@ class EntryPage extends StatelessWidget {
 
   Widget _navigateToLoginPage(
       {@required bool isRestaurant, @required AuthenticationRepo auth}) {
-    return LoginPage(
-      isRestaurant: isRestaurant,
-      authenticationRepo: auth,
+    return Scaffold(
+      body: LoginPage(
+        isRestaurant: isRestaurant,
+        authenticationRepo: auth,
+      ),
     );
   }
 }
