@@ -8,11 +8,15 @@ abstract class LoginEvent extends Equatable {
 class LoginButtonPressed extends LoginEvent {
   final String username;
   final String password;
+  final bool isRestaurant;
 
-  LoginButtonPressed({
-    @required this.username,
-    @required this.password,
-  }) : super([username, password]);
+  LoginButtonPressed(
+      {@required this.username,
+      @required this.password,
+      @required this.isRestaurant})
+      : super([username, password, isRestaurant]) {
+    print('LoginButtonPressed { username: $username, password: $password }');
+  }
 
   @override
   String toString() =>

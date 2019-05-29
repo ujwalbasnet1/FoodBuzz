@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantRepo.dart';
+import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
 import 'package:meta/meta.dart';
 
 import 'AuthenticationEvent.dart';
@@ -7,10 +7,10 @@ import 'AuthenticationState.dart';
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
-  final RestaurantRepo restaurantRepo;
+  final AuthenticationRepo authenticationRepo;
 
-  AuthenticationBloc({@required this.restaurantRepo})
-      : assert(restaurantRepo != null);
+  AuthenticationBloc({@required this.authenticationRepo})
+      : assert(authenticationRepo != null);
 
   @override
   AuthenticationState get initialState => AuthenticationUnauthenticated();
@@ -19,11 +19,12 @@ class AuthenticationBloc
   Stream<AuthenticationState> mapEventToState(
       AuthenticationEvent event) async* {
     if (event is AppStarted) {
-      final String token = await (restaurantRepo.retrieveToken());
+      final String token = await (authenticationRepo.retrieveToken());
       final bool hasToken = token != null ? true : false;
+      final bool _role = await authenticationRepo.retrieveRole();
 
       if (hasToken) {
-        yield AuthenticationAuthenticated();
+        yield AuthenticationAuthenticated(isRestaurant: _role);
       } else {
         yield AuthenticationUnauthenticated();
       }
@@ -31,13 +32,13 @@ class AuthenticationBloc
 
     if (event is LoggedIn) {
       yield AuthenticationLoading();
-      await restaurantRepo.persistToken(event.token);
-      yield AuthenticationAuthenticated();
+      await authenticationRepo.persistToken(event.token);
+      yield AuthenticationAuthenticated(isRestaurant: event.role);
     }
 
     if (event is LoggedOut) {
       yield AuthenticationLoading();
-      await restaurantRepo.deleteToken();
+      await authenticationRepo.deleteToken();
       yield AuthenticationUnauthenticated();
     }
   }

@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
 import 'package:food_buzz/Blocs/Login/LoginBloc.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantRepo.dart';
+import 'package:food_buzz/Blocs/Login/LoginEvent.dart';
+import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
 
 class LoginPage extends StatelessWidget {
   final bool isRestaurant;
-  final RestaurantRepo restaurantRepo;
+  final AuthenticationRepo authenticationRepo;
 
-  LoginPage({this.isRestaurant = false, @required this.restaurantRepo});
+  LoginPage({@required this.isRestaurant, @required this.authenticationRepo});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 50),
-            Image.asset(
-              'assets/images/foodbuzz.jpg',
-              width: 200,
-            ),
-            _LoginForm(isRestaurant: isRestaurant),
-          ],
-        ),
+      backgroundColor: Colors.yellow,
+      body: ListView(
+        children: <Widget>[
+          // SizedBox(height: 50),
+          Image.asset(
+            'assets/images/foodbuzz.jpg',
+            width: 200,
+          ),
+          _LoginForm(
+            isRestaurant: isRestaurant,
+            authenticationRepo: authenticationRepo,
+          ),
+        ],
       ),
     );
   }
@@ -30,9 +33,9 @@ class LoginPage extends StatelessWidget {
 
 class _LoginForm extends StatefulWidget {
   final bool isRestaurant;
-  final RestaurantRepo restaurantRepo;
+  final AuthenticationRepo authenticationRepo;
 
-  _LoginForm({@required this.isRestaurant, @required this.restaurantRepo});
+  _LoginForm({@required this.isRestaurant, @required this.authenticationRepo});
 
   @override
   __LoginformState createState() => __LoginformState();
@@ -50,9 +53,10 @@ class __LoginformState extends State<_LoginForm> {
   @override
   void initState() {
     _authenticationBloc =
-        AuthenticationBloc(restaurantRepo: widget.restaurantRepo);
+        AuthenticationBloc(authenticationRepo: widget.authenticationRepo);
+
     _loginBloc = LoginBloc(
-      restaurantRepository: widget.restaurantRepo,
+      authenticationRepo: widget.authenticationRepo,
       authenticationBloc: _authenticationBloc,
     );
     super.initState();
@@ -71,6 +75,7 @@ class __LoginformState extends State<_LoginForm> {
     String _text = (widget.isRestaurant) ? 'Restaurant Id' : 'Email';
 
     return Container(
+      color: Colors.green,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -117,6 +122,10 @@ class __LoginformState extends State<_LoginForm> {
                   child: Text('Log In'),
                   onPressed: () {
                     // dispatch
+                    _loginBloc.dispatch(LoginButtonPressed(
+                        username: usernameController.text,
+                        password: passwordController.text,
+                        isRestaurant: widget.isRestaurant));
                   },
                 ),
               ),
@@ -138,7 +147,7 @@ class __LoginformState extends State<_LoginForm> {
                   )
                 ],
               ),
-              _buildBottomSection(),
+              // _buildBottomSection(),
             ],
           ),
         ),

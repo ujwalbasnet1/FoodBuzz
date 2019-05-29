@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
 import 'package:food_buzz/UIs/Loginpage.dart';
-import 'package:food_buzz/UIs/Restaurantprofile.dart';
 
 class EntryPage extends StatelessWidget {
+  final AuthenticationRepo authenticationRepo;
+
+  EntryPage({@required this.authenticationRepo}) {
+    if (authenticationRepo == null) {
+      print('Hhahahah its null 3\n\n\n\n\n\n\n');
+    } else {
+      print('Its not null \n\n\n\n\n\n');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -49,9 +59,8 @@ class EntryPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => LoginPage(
-                                  isRestaurant: true,
-                                )));
+                            builder: (context) => _navigateToLoginPage(
+                                isRestaurant: true, auth: authenticationRepo)));
                   },
                 ),
               ),
@@ -83,9 +92,9 @@ class EntryPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => LoginPage(
-                                  isRestaurant: false,
-                                )));
+                            builder: (context) => _navigateToLoginPage(
+                                isRestaurant: false,
+                                auth: authenticationRepo)));
                   },
                 ),
               ),
@@ -93,6 +102,14 @@ class EntryPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _navigateToLoginPage(
+      {@required bool isRestaurant, @required AuthenticationRepo auth}) {
+    return LoginPage(
+      isRestaurant: isRestaurant,
+      authenticationRepo: auth,
     );
   }
 }

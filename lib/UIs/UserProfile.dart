@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:food_buzz/TestData/TestData.dart';
-import 'package:food_buzz/UIs/Personitem.dart';
 import 'package:food_buzz/UIs/Postitem.dart';
 
 class UserProfile extends StatelessWidget {

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationEvent.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantRepo.dart';
+import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 
@@ -10,13 +10,13 @@ import 'LoginEvent.dart';
 import 'LoginState.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final RestaurantRepo restaurantRepository;
+  final AuthenticationRepo authenticationRepo;
   final AuthenticationBloc authenticationBloc;
 
   LoginBloc({
-    @required this.restaurantRepository,
+    @required this.authenticationRepo,
     @required this.authenticationBloc,
-  })  : assert(restaurantRepository != null),
+  })  : assert(authenticationRepo != null),
         assert(authenticationBloc != null);
 
   LoginState get initialState => LoginInitial();
@@ -27,12 +27,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield LoginLoading();
 
       try {
-        final token = await restaurantRepository.authenticate(
-          username: event.username,
-          password: event.password,
-        );
+        final token = await authenticationRepo.authenticate(
+            username: event.username,
+            password: event.password,
+            isRestaurant: event.isRestaurant);
 
-        authenticationBloc.dispatch(LoggedIn(token: token));
+        authenticationBloc
+            .dispatch(LoggedIn(token: token, role: event.isRestaurant));
         yield LoginInitial();
       } catch (error) {
         yield LoginFailure(error: error.toString());

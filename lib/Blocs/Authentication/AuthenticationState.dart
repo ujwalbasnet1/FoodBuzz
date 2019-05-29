@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 
 // A user's authentication state can be one of the following:
 
@@ -26,6 +27,10 @@ class AuthenticationUninitialized extends AuthenticationState {
 }
 
 class AuthenticationAuthenticated extends AuthenticationState {
+  bool isRestaurant;
+
+  AuthenticationAuthenticated({@required this.isRestaurant});
+
   @override
   String toString() => 'AuthenticationAuthenticated';
 }
