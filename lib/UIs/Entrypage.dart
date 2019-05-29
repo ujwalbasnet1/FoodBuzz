@@ -5,13 +5,7 @@ import 'package:food_buzz/UIs/Loginpage.dart';
 class EntryPage extends StatelessWidget {
   final AuthenticationRepo authenticationRepo;
 
-  EntryPage({@required this.authenticationRepo}) {
-    if (authenticationRepo == null) {
-      print('Hhahahah its null 3\n\n\n\n\n\n\n');
-    } else {
-      print('Its not null \n\n\n\n\n\n');
-    }
-  }
+  EntryPage({@required this.authenticationRepo});
 
   @override
   Widget build(BuildContext context) {

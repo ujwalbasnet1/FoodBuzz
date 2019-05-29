@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationEvent.dart';
 import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
@@ -32,10 +33,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             password: event.password,
             isRestaurant: event.isRestaurant);
 
+        // yield ();
         authenticationBloc
             .dispatch(LoggedIn(token: token, role: event.isRestaurant));
-        yield LoginInitial();
+
+        yield LoginSuccess();
       } catch (error) {
+        print('\n\n\n\n\n Error is this okay' + error.toString());
         yield LoginFailure(error: error.toString());
       }
     }

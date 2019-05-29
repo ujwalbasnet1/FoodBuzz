@@ -14,6 +14,11 @@ class LoginInitial extends LoginState {
   String toString() => 'LoginInitial';
 }
 
+class LoginSuccess extends LoginState {
+  @override
+  String toString() => 'LoginSuccess';
+}
+
 class LoginLoading extends LoginState {
   @override
   String toString() => 'LoginLoading';

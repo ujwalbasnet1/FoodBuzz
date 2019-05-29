@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
 import 'package:food_buzz/Blocs/Login/LoginBloc.dart';
 import 'package:food_buzz/Blocs/Login/LoginEvent.dart';
+import 'package:food_buzz/Blocs/Login/LoginState.dart';
 import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
 
 class LoginPage extends StatelessWidget {
@@ -51,8 +53,7 @@ class __LoginformState extends State<_LoginForm> {
 
   @override
   void initState() {
-    _authenticationBloc =
-        AuthenticationBloc(authenticationRepo: widget.authenticationRepo);
+    _authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
 
     _loginBloc = LoginBloc(
       authenticationRepo: widget.authenticationRepo,
@@ -73,84 +74,118 @@ class __LoginformState extends State<_LoginForm> {
   Widget build(BuildContext context) {
     String _text = (widget.isRestaurant) ? 'Restaurant Id' : 'Email';
 
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
+    return BlocBuilder<LoginEvent, LoginState>(
+        bloc: _loginBloc,
+        builder: (
+          BuildContext context,
+          LoginState state,
+        ) {
+          if (state is LoginFailure) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${state.error}'),
+                  backgroundColor: Colors.red,
+                  duration: Duration(milliseconds: 250),
+                ),
+              );
+            });
+          } else if (state is LoginSuccess) {
+            Navigator.pop(context);
+          }
+
+          return Stack(
             children: <Widget>[
-              TextFormField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: BorderSide(
-                        color: Colors.black54,
-                      )),
-                  hintText: _text,
-                ),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: BorderSide(
-                        color: Colors.black54,
-                      )),
-                  hintText: 'Password',
-                ),
-              ),
-              SizedBox(
-                height: 15,
-              ),
               Container(
-                width: MediaQuery.of(context).size.width,
-                child: RaisedButton(
-                  padding: EdgeInsets.symmetric(horizontal: 0, vertical: 14),
-                  textColor: Colors.white,
-                  color: Color(0XFFD22030),
-                  child: Text('Log In'),
-                  onPressed: () {
-                    // dispatch
-                    _loginBloc.dispatch(LoginButtonPressed(
-                        username: usernameController.text,
-                        password: passwordController.text,
-                        isRestaurant: widget.isRestaurant));
-                  },
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: <Widget>[
+                        TextFormField(
+                          controller: usernameController,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 14, horizontal: 10),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: BorderSide(
+                                  color: Colors.black54,
+                                )),
+                            hintText: _text,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 14, horizontal: 10),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: BorderSide(
+                                  color: Colors.black54,
+                                )),
+                            hintText: 'Password',
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: RaisedButton(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 0, vertical: 14),
+                            textColor: Colors.white,
+                            color: Color(0XFFD22030),
+                            child: Text('Log In'),
+                            onPressed: () {
+                              // dispatch
+                              if (!(state is LoginLoading)) {
+                                _loginBloc.dispatch(LoginButtonPressed(
+                                  username: usernameController.text,
+                                  password: passwordController.text,
+                                  isRestaurant: widget.isRestaurant,
+                                ));
+                              }
+                            },
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'Forgot your login details?',
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.black38),
+                            ),
+                            FlatButton(
+                              padding: EdgeInsets.all(0),
+                              child: Text(
+                                ' Get help signing in',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: () {},
+                            )
+                          ],
+                        ),
+                        // _buildBottomSection(),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    'Forgot your login details?',
-                    style: TextStyle(fontSize: 12, color: Colors.black38),
-                  ),
-                  FlatButton(
-                    padding: EdgeInsets.all(0),
-                    child: Text(
-                      ' Get help signing in',
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () {},
-                  )
-                ],
+              Center(
+                child:
+                    state is LoginLoading ? CircularProgressIndicator() : null,
               ),
-              // _buildBottomSection(),
             ],
-          ),
-        ),
-      ),
-    );
+          );
+        });
   }
 
   Widget _buildBottomSection() {

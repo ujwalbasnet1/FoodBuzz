@@ -8,7 +8,7 @@ class AuthenticationRepo {
 
   String authenticationURL;
 
-  AuthenticationRepo() {}
+  AuthenticationRepo();
 
   Future<String> authenticate(
       {@required String username,
@@ -30,7 +30,7 @@ class AuthenticationRepo {
         _storeRole(isRestaurant);
         return (jsonDecode(response.body)['token']);
       } else {
-        throw (jsonDecode(response.body)['message']);
+        return Future.error(jsonDecode(response.body)['message']);
       }
     } catch (error) {
       return error.toString();
