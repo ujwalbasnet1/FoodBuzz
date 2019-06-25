@@ -18,9 +18,8 @@ class LoggedIn extends AuthenticationEvent {
   final String token;
   final bool role;
 
-  LoggedIn({@required this.token, @required this.role}) : super([token, role]) {
-    print('\n\n\n\n\nLogin Successful' + this.token);
-  }
+  LoggedIn({@required this.token, @required this.role})
+      : super([token, role]) {}
 
   @override
   String toString() => 'LoggedIn { token: $token , role: $role}';

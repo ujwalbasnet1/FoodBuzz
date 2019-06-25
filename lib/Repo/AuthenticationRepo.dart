@@ -3,8 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../const.dart';
+
 class AuthenticationRepo {
-  final String baseURL = 'http://192.168.0.11:3000/';
+  final String baseURL = Constant.baseURL;
 
   String authenticationURL;
 

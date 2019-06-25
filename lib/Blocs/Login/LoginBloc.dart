@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
 import 'package:food_buzz/Blocs/Authentication/AuthenticationEvent.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
+import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 
@@ -33,7 +33,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             password: event.password,
             isRestaurant: event.isRestaurant);
 
-        // yield ();
         authenticationBloc
             .dispatch(LoggedIn(token: token, role: event.isRestaurant));
 

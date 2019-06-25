@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:async';
 import 'package:dio/dio.dart';
 
+import 'const.dart';
+
 class ImageUpload extends StatefulWidget {
   @override
   _ImageUploadState createState() => _ImageUploadState();
@@ -30,7 +32,7 @@ class _ImageUploadState extends State<ImageUpload>
     formdata.add("myFile", new UploadFileInfo(_image, (_image.path)));
     dio
         .post(
-          "http://192.168.0.6:3000/file",
+          Constant.baseURL + "file",
           data: formdata,
           options: Options(
               method: 'POST',
@@ -68,31 +70,6 @@ class _ImageUploadState extends State<ImageUpload>
           LinearProgressIndicator(
             value: _uploadedPercent,
           ),
-          // AnimatedContainer(
-          //   width: MediaQuery.of(context).size.width,
-          //   duration: Duration(milliseconds: 50),
-          //   curve: Curves.fastOutSlowIn,
-          //   height: 20,
-          //   child: ClipRect(
-          //     child: Stack(
-          //       alignment: Alignment.center,
-          //       fit: StackFit.loose,
-          //       children: <Widget>[
-          //         Padding(
-          //           padding: EdgeInsets.symmetric(horizontal: 15),
-          //           child: LinearProgressIndicator(
-          //             value: _uploadedPercent,
-          //           ),
-          //         ),
-          //         Text(
-          //           (_uploadedPercent * 100).toInt().toString() + ' %',
-          //           overflow: TextOverflow.ellipsis,
-          //           style: TextStyle(color: Colors.black),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

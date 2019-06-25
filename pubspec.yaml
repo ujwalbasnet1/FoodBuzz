@@ -33,6 +33,9 @@ dependencies:
   equatable: ^0.2.0
   shared_preferences: ^0.5.2+1
   http: ^0.12.0+2
+  shimmer: ^0.0.1
+  sticky_headers: "^0.1.8"
+  flutter_map:
 
 dev_dependencies:
   flutter_test:

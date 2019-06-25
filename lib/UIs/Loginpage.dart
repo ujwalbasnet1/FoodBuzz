@@ -4,7 +4,7 @@ import 'package:food_buzz/Blocs/Authentication/AuthenticationBloc.dart';
 import 'package:food_buzz/Blocs/Login/LoginBloc.dart';
 import 'package:food_buzz/Blocs/Login/LoginEvent.dart';
 import 'package:food_buzz/Blocs/Login/LoginState.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
+import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 
 class LoginPage extends StatelessWidget {
   final bool isRestaurant;

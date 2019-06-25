@@ -1,0 +1,12 @@
+Shimmer(
+            child: Container(
+              margin: EdgeInsets.all(8.0),
+              width: _width,
+              height: 20,
+              color: Colors.red,
+            ),
+            direction: ShimmerDirection.ltr,
+            period: Duration(milliseconds: 1600),
+            gradient: LinearGradient(
+                colors: [Colors.black12, Colors.black54, Colors.black12]),
+          ),

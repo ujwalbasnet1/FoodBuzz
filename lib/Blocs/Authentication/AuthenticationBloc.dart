@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
+import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 import 'package:meta/meta.dart';
 
 import 'AuthenticationEvent.dart';

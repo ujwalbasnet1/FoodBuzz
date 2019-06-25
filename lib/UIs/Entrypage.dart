@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_buzz/Repo/RestaurantRepositories/AuthenticationRepo.dart';
+import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 import 'package:food_buzz/UIs/Loginpage.dart';
 
 class EntryPage extends StatelessWidget {

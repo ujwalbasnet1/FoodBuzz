@@ -1,19 +1,53 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class PostItem extends StatelessWidget {
+class PostItem extends StatefulWidget {
   final String img, name, ago;
 
   PostItem({@required this.name, @required this.img, @required this.ago});
 
   @override
+  _PostItemState createState() => _PostItemState();
+}
+
+class _PostItemState extends State<PostItem>
+    with SingleTickerProviderStateMixin {
+  GlobalKey _imageContainerKey = GlobalKey();
+
+  Animation<double> animation;
+  Animation curveAnimation;
+  AnimationController animationController;
+
+  Size postedImageSize;
+  bool isLit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    curveAnimation =
+        CurvedAnimation(parent: animationController, curve: Curves.easeOutBack);
+
+    animation = Tween<double>(begin: 0, end: 1).animate(curveAnimation)
+      ..addListener(() {
+        setState(() {});
+      });
+
+    postedImageSize = new Size(0, 0);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Widget circularimg = Container(
+    double _height = postedImageSize.height ?? 0;
+
+    Widget circularImg = Container(
         width: 64.0,
         height: 64.0,
         decoration: new BoxDecoration(
             shape: BoxShape.circle,
             image: new DecorationImage(
-                fit: BoxFit.fill, image: NetworkImage(img))));
+                fit: BoxFit.fill, image: NetworkImage(widget.img))));
 
     return Container(
       decoration: BoxDecoration(
@@ -37,7 +71,7 @@ class PostItem extends StatelessWidget {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    circularimg,
+                    circularImg,
                     Padding(
                       padding: const EdgeInsets.only(left: 16.0),
                       child: Column(
@@ -46,7 +80,7 @@ class PostItem extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Text(
-                            name,
+                            widget.name,
                             style: TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,
@@ -56,7 +90,7 @@ class PostItem extends StatelessWidget {
                             height: 4,
                           ),
                           Text(
-                            ago,
+                            widget.ago,
                             style: TextStyle(fontSize: 12, fontFamily: 'Lato'),
                           ),
                         ],
@@ -64,13 +98,21 @@ class PostItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
-                  color: Colors.deepOrange,
-                  icon: Icon(
-                    Icons.whatshot,
-                    size: 36,
+                InkWell(
+                  onTap: () {
+                    print('Button CLicked');
+                    setState(() {
+                      isLit = !isLit;
+                    });
+                  },
+                  child: IconButton(
+                    color: isLit ? Colors.deepOrange : Colors.black,
+                    icon: Icon(
+                      Icons.whatshot,
+                      size: 36,
+                    ),
+                    onPressed: () {},
                   ),
-                  onPressed: () {},
                 )
               ],
             ),
@@ -82,11 +124,47 @@ class PostItem extends StatelessWidget {
                 maxLines: 2,
               ),
             ),
-            Image.network(
-              img,
-              width: MediaQuery.of(context).size.width,
-              fit: BoxFit.fitWidth,
-            )
+            InkWell(
+                onDoubleTap: () {
+                  setState(() {
+                    isLit = true;
+                    postedImageSize = _imageContainerKey.currentContext.size;
+                    _height = postedImageSize.height;
+                  });
+
+                  setState(() {
+                    animationController.reset();
+                    animationController.forward();
+//                heartAnimationController.reset();
+                    Future.delayed(Duration(milliseconds: 1000), () {
+                      animationController.reset();
+                    });
+                  });
+                },
+                child: Stack(
+                  children: <Widget>[
+                    Image.network(
+                      widget.img,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.fitWidth,
+                      key: _imageContainerKey,
+                    ),
+                    Container(
+                      height: _height,
+                      color: Colors.black.withOpacity(animation.value * 0.2),
+                    ),
+                    Positioned(
+                      top: _height * 0.5 - 48 * animation.value,
+                      right: MediaQuery.of(context).size.width * 0.5 -
+                          48 * animation.value,
+                      child: Icon(
+                        Icons.whatshot,
+                        size: 96 * animation.value,
+                        color: Colors.orange,
+                      ),
+                    )
+                  ],
+                ))
           ],
         ),
       ),
