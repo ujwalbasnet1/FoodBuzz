@@ -1,3 +1,5 @@
+import 'package:food_buzz/Models/Dish.dart';
+import 'package:food_buzz/Models/DishCategories.dart';
 import 'package:food_buzz/Models/FoodItem.dart';
 import 'package:food_buzz/Models/Restaurant.dart';
 import 'package:food_buzz/Repo/AuthenticationRepo.dart';
@@ -51,6 +53,56 @@ class RestaurantProfileRepo {
     }
   }
 
+  Future<List<DishCategories>> getCategoriesDishes() async {
+    final String _registrationURL = baseURL + 'dish';
+
+    print('\n\n\n\Requested');
+
+    var client = new http.Client();
+
+    try {
+      var registerResponse = await client.get(_registrationURL, headers: {
+        HttpHeaders.authorizationHeader:
+            'Bearer ' + await authenticationRepo.retrieveToken()
+      });
+
+      List<DishCategories> categoryList = [];
+
+      // check if status code is not greater than 300
+      if (!(registerResponse.statusCode > 300)) {
+        Map<String, dynamic> rawData = jsonDecode(registerResponse.body);
+
+        rawData.forEach((String key, dynamic value) {
+          DishCategories dishCategories = DishCategories();
+          dishCategories.category = key;
+          dishCategories.dishes = [];
+
+          for (int i = 0; i < value.length; i++) {
+            DishCategoryItem dishCategoryItem = DishCategoryItem(
+              id: value[i]['id'].toString(),
+              restaurantId: value[i]['restaurant_id'].toString(),
+              name: value[i]['name'].toString(),
+              price: value[i]['price'].toString(),
+              picture: value[i]['picture'].toString(),
+              categoryId: value[i]['category_id'].toString(),
+            );
+
+            dishCategories.dishes.add(dishCategoryItem);
+          }
+
+          categoryList.add(dishCategories);
+        });
+
+        return categoryList;
+      } else {
+        // return Future.error(jsonDecode(response.body)['message']);
+        throw Future.error(jsonDecode(registerResponse.body)['message']);
+      }
+    } catch (error) {
+      throw Future.error(error.toString());
+    }
+  }
+
   Future<List<Map<String, String>>> getCategories() async {
     final String _registrationURL = baseURL + 'categories';
 
@@ -71,8 +123,6 @@ class RestaurantProfileRepo {
         for (int i = 0; i < rawData.length; i++) {
           categoryList.add({rawData[i]['id'].toString(): rawData[i]['name']});
         }
-        print('\n\n\n\n\n\n\nList');
-        print(categoryList);
         return categoryList;
       } else {
         // return Future.error(jsonDecode(response.body)['message']);
@@ -121,32 +171,19 @@ class RestaurantProfileRepo {
     }
   }
 
-  Future<void> addDish(
-      {@required String imageURL,
-      @required String name,
-      @required String price,
-      @required List<String> category}) async {
+  Future<String> addDish({@required Dish dish}) async {
     var client = new http.Client();
-    String categories = '';
-
-    for (int i = 0; i < category.length; i++) {
-      if (i == category.length - 1) {
-        categories += category[i];
-      } else {
-        categories += category[i] + ',';
-      }
-    }
 
     try {
-      var response = await client.post(
-        baseURL + 'dish',
-        body: {
-          'picture': imageURL,
-          'name': name,
-          'price': price,
-          'category': categories
-        },
-      );
+      var response = await client.post(baseURL + 'dish', body: {
+        'picture': dish.imageURL,
+        'name': dish.name,
+        'price': dish.price,
+        'categories': dish.categories
+      }, headers: {
+        HttpHeaders.authorizationHeader:
+            'Bearer ' + await authenticationRepo.retrieveToken()
+      });
 
       // check if status code is not greater than 300
       if (!(response.statusCode > 300)) {

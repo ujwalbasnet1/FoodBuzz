@@ -10,6 +10,7 @@ import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 import 'package:food_buzz/UIs/Entrypage.dart';
 import 'package:food_buzz/UIs/Splashpage.dart';
 import 'package:food_buzz/UIs/HomePage.dart';
+import 'package:food_buzz/UIs/UserProfile.dart';
 import 'package:food_buzz/animationTest.dart';
 
 import 'package:shimmer/shimmer.dart';
@@ -26,16 +27,14 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // return MainPage(
-    //   authenticationRepo: new AuthenticationRepo(),
-    // );
-
-    double _width = 300;
-
-    return MaterialApp(
-      theme: ThemeData(fontFamily: 'Lato'),
-      home: SafeArea(child: Scaffold(body: AddDish())),
+    return MainPage(
+      authenticationRepo: new AuthenticationRepo(),
     );
+
+    // return MaterialApp(
+    //   theme: ThemeData(fontFamily: 'Lato', primaryColor: Color(0XFFD22030)),
+    //   home: SafeArea(child: Scaffold(body: UserProfile())),
+    // );
   }
 }
 // 0XFFD22030

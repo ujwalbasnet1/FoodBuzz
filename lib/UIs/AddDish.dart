@@ -1,8 +1,14 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:food_buzz/Models/Category.dart';
+import 'package:food_buzz/Models/Dish.dart';
+import 'package:food_buzz/Repo/AuthenticationRepo.dart';
+import 'package:food_buzz/Repo/Repo.dart';
+import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantProfileRepo.dart';
 
 import 'package:image_picker/image_picker.dart';
 
@@ -31,11 +37,17 @@ class _AddDishFormState extends State<AddDishForm> {
   final priceController = TextEditingController();
   // pictureController;
 
+  Dish _dish = new Dish();
   File _image;
   double _uploadedPercent = 0;
   bool _progressing = false;
-  List<Map<String, String>> totalCategories;
-  List<Map<String, String>> addedCategories;
+  bool _dishAdded = false;
+
+  List<Category> totalCategories = new List<Category>();
+  List<Category> addedCategories = new List<Category>();
+
+  String _addedCategoriesId = '';
+  String _addedCategoriesName = '';
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -64,8 +76,9 @@ class _AddDishFormState extends State<AddDishForm> {
           _uploadedPercent = (sent / total);
         });
       },
-    ).then((response) {
-      print(response);
+    ).then((Response response) {
+      print('\n\n\n\n\n\n\n\n\nxxx');
+      _dish.imageURL = (response.data['URL']);
       setState(() {
         _progressing = false;
       });
@@ -75,18 +88,41 @@ class _AddDishFormState extends State<AddDishForm> {
           SnackBar(
             content: Text(error.toString()),
             backgroundColor: Colors.red,
-            duration: Duration(milliseconds: 250),
+            duration: Duration(milliseconds: 1000),
           ),
         );
       });
     });
   }
 
-  void addCategories({@required String index}) {
-    Map<String, String> temp = new HashMap();
-    // temp[index] = totalCategories.elementAt(index);
+  void addCategories({@required Category category}) {
+    setState(() {
+      if (addedCategories.length >= 1) {
+        _addedCategoriesId += ', ' + category.id;
+        _addedCategoriesName += ', ' + category.name;
+      } else {
+        _addedCategoriesId += category.id;
+        _addedCategoriesName += category.name;
+      }
+      addedCategories.add(category);
+      totalCategories.remove(category);
+    });
+  }
 
-    addedCategories.add();
+  @override
+  void initState() {
+    super.initState();
+    Repo().getCategories().then((List<Category> categories) {
+      for (int i = 0; i < categories.length; i++) {
+        setState(() {
+          totalCategories.add(categories[i]);
+        });
+      }
+
+      for (int i = 0; i < totalCategories.length; i++) {
+        print(totalCategories[i]);
+      }
+    });
   }
 
   @override
@@ -131,7 +167,6 @@ class _AddDishFormState extends State<AddDishForm> {
           SizedBox(height: 20),
           TextFormField(
             controller: nameController,
-            obscureText: true,
             decoration: InputDecoration(
               contentPadding:
                   EdgeInsets.symmetric(vertical: 14, horizontal: 10),
@@ -146,7 +181,6 @@ class _AddDishFormState extends State<AddDishForm> {
           SizedBox(height: 20),
           TextFormField(
             controller: priceController,
-            obscureText: true,
             decoration: InputDecoration(
               contentPadding:
                   EdgeInsets.symmetric(vertical: 14, horizontal: 10),
@@ -159,13 +193,30 @@ class _AddDishFormState extends State<AddDishForm> {
             ),
           ),
           SizedBox(height: 20),
-          DropdownButton(
-            items: List.generate(totalCategories.length, (index) {
-              return DropdownMenuItem(value: 1, child: Text('123'));
-            }),
-            onChanged: (int index) {
-              addCategories(index: index);
-            },
+          // categories list
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 8),
+            alignment: Alignment(0, 0),
+            child: DropdownButton(
+              isExpanded: false,
+              hint: Text('Add Categories'),
+              items: List.generate(totalCategories.length, (index) {
+                return DropdownMenuItem(
+                    value: totalCategories[index],
+                    child: Text(totalCategories[index].name));
+              }),
+              onChanged: (Category category) {
+                addCategories(category: category);
+              },
+            ),
+          ),
+          SizedBox(height: 20),
+          // added categories
+          Text(
+            (_addedCategoriesName.length <= 0)
+                ? 'Categories Name'
+                : _addedCategoriesName,
+            textAlign: TextAlign.left,
           ),
           SizedBox(height: 20),
           Container(
@@ -177,6 +228,31 @@ class _AddDishFormState extends State<AddDishForm> {
               child: Text('ADD'),
               onPressed: () {
                 uploadPic();
+                _dish.name = nameController.text;
+                _dish.price = priceController.text;
+                _dish.categories = _addedCategoriesId;
+                print(_dish);
+                RestaurantProfileRepo(authenticationRepo: AuthenticationRepo())
+                    .addDish(dish: _dish)
+                    .then((message) {
+                  if (message == 'Dish was added to your restaurant.') {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(message.toString()),
+                          backgroundColor: Colors.green,
+                          duration: Duration(milliseconds: 1000),
+                        ),
+                      );
+                    });
+                    Future.delayed(Duration(milliseconds: 1000), () {
+                      Navigator.pop(context);
+                    });
+                  }
+                  print('message from repo \n\n' + message.toString());
+                }).catchError((error) {
+                  print('error from respos \n\n' + error.toString());
+                });
               },
             ),
           )

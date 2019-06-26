@@ -1,115 +1,147 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:food_buzz/Models/DishCategories.dart';
 import 'package:food_buzz/Models/Restaurant.dart';
 import 'package:food_buzz/Models/FoodItem.dart';
 import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantProfileRepo.dart';
+import 'package:food_buzz/UIs/AddDish.dart';
 import 'package:food_buzz/UIs/restaurantitem.dart';
 
 import 'package:sticky_headers/sticky_headers.dart';
 
-class RestaurantProfile extends StatelessWidget {
+import '../const.dart';
+
+class RestaurantProfile extends StatefulWidget {
+  @override
+  _RestaurantProfileState createState() => _RestaurantProfileState();
+}
+
+class _RestaurantProfileState extends State<RestaurantProfile> {
   final RestaurantProfileRepo _restaurantProfileRepo =
       RestaurantProfileRepo(authenticationRepo: AuthenticationRepo());
 
   List<FoodItem> foodList = [];
+  DishCategories _dishCategories = DishCategories();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     int _count = 2;
+
     return Scaffold(
-        body: ListView.builder(
-      shrinkWrap: true,
-      itemCount: _count,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          return _topSection(context);
-        } else if (index == 1) {
-          return StickyHeader(
-              overlapHeaders: false,
-              header: Container(
-                height: 48,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                        top: BorderSide(color: Colors.black12, width: 1),
-                        bottom: BorderSide(color: Colors.black12, width: 1))),
-                child: FutureBuilder(
-                  future: _restaurantProfileRepo.getCategories(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<Map<String, String>>> snapshot) {
-                    if (snapshot.hasData) {
-                      return ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: snapshot.data.length,
-                          separatorBuilder: (BuildContext context, int index) {
-                            return SizedBox(width: 15);
-                          },
-                          itemBuilder: (BuildContext context, int index) {
-                            String value = '';
-                            String key = '';
-
-                            snapshot.data[index].forEach((k, val) {
-                              key = k.toString();
-                              value = val;
-                            });
-
-                            return Center(
-                                child: InkWell(
-                              onTap: () async {
-                                foodList = await _restaurantProfileRepo
-                                    .getItems(categoryId: key);
-                                print(foodList);
+        body: Stack(
+      children: <Widget>[
+        Container(),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: _count,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0) {
+              return _topSection(context);
+            } else if (index == 1) {
+              return StickyHeader(
+                  overlapHeaders: false,
+                  header: Container(
+                    height: 48,
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                            top: BorderSide(color: Colors.black12, width: 1),
+                            bottom:
+                                BorderSide(color: Colors.black12, width: 1))),
+                    child: FutureBuilder(
+                      future: _restaurantProfileRepo.getCategoriesDishes(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<DishCategories>> snapshot) {
+                        if (snapshot.hasData) {
+                          return ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snapshot.data.length,
+                              separatorBuilder:
+                                  (BuildContext context, int index) {
+                                return SizedBox(width: 15);
                               },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: Color(0XFFD22030),
-                                    borderRadius: BorderRadius.circular(32),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 2,
-                                      ),
-                                    ]),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 6.0, horizontal: 16),
-                                  child: Text(value,
-                                      style: TextStyle(color: Colors.white)),
-                                ),
-                              ),
-                            ));
-                          });
-                    } else if (snapshot.hasError) {
-                      print(snapshot.error);
-                      return Container(
-                          color: Colors.red, width: 200, height: 200);
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  },
-                ),
-              ),
-              content: ListView.builder(
-                  itemCount: 10,
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _foodItemBuilder(_FoodItem(
-                        name: 'Chicken Curry',
-                        picURL:
-                            'https://www.kitchensanctuary.com/wp-content/uploads/2016/02/Slow-cooked-spicy-chicken-square.jpg',
-                        price: 'Rs. 1000',
-                        tagName:
-                            'Chicken, Spicy, Lorem, Ipsum, Hello, World, Blab Blah, Haa haha , HEe , Tung Tung'));
-                  }));
-        }
-      },
+                              itemBuilder: (BuildContext context, int index) {
+                                return Center(
+                                    child: InkWell(
+                                  onTap: () async {
+                                    // show list of items of the category
+                                    setState(() {
+                                      _dishCategories = snapshot.data[index];
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Color(0XFFD22030),
+                                        borderRadius: BorderRadius.circular(32),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.3),
+                                            blurRadius: 2,
+                                          ),
+                                        ]),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6.0, horizontal: 16),
+                                      child: Text(snapshot.data[index].category,
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                    ),
+                                  ),
+                                ));
+                              });
+                        } else if (snapshot.hasError) {
+                          print(snapshot.error);
+                          return Container(
+                              color: Colors.red, width: 200, height: 200);
+                        } else {
+                          return CircularProgressIndicator();
+                        }
+                      },
+                    ),
+                  ),
+                  content: ListView.builder(
+                      itemCount: _dishCategories.dishes.length,
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        return _foodItemBuilder(_FoodItem(
+                            name: _dishCategories.dishes[index].name,
+                            picURL: _dishCategories.dishes[index].picture
+                                    .contains('http')
+                                ? _dishCategories.dishes[index].picture
+                                : Constant.baseURL +
+                                    _dishCategories.dishes[index].picture,
+                            price: 'Rs. ' + _dishCategories.dishes[index].price,
+                            tagName:
+                                'Chicken, Spicy, Lorem, Ipsum, Hello, World, Blab Blah, Haa haha , HEe , Tung Tung'));
+                      }));
+            }
+          },
+        ),
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: FloatingActionButton(
+            onPressed: () {
+              _restaurantProfileRepo.getCategoriesDishes();
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => AddDish()));
+            },
+            child: Icon(Icons.add, color: Colors.white),
+            backgroundColor: Color(0XFFD22030),
+          ),
+        )
+      ],
     ));
   }
-
-  // loyalty
 
   Widget _foodItemBuilder(_FoodItem foodItem) {
     return Container(

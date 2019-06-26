@@ -1,3 +1,4 @@
+import 'package:food_buzz/Models/Category.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -8,22 +9,24 @@ import '../const.dart';
 class Repo {
   final String baseURL = Constant.baseURL;
 
-  Future<List<Map<String, String>>> getCategories() async {
-    final String categoriesURL = baseURL + 'categories';
+  Future<List<Category>> getCategories() async {
+    final String categoriesURL = baseURL + 'category';
 
     var client = new http.Client();
 
     try {
       var registerResponse = await client.get(categoriesURL);
 
-      List<Map<String, String>> categoryList = [];
+      List<Category> categoryList = [];
 
       // check if status code is not greater than 300
       if (!(registerResponse.statusCode > 300)) {
         var rawData = jsonDecode(registerResponse.body);
 
         for (int i = 0; i < rawData.length; i++) {
-          categoryList.add({rawData[i]['id'].toString(): rawData[i]['name']});
+          categoryList.add(new Category(
+              id: rawData[i]['id'].toString(),
+              name: rawData[i]['name'].toString()));
         }
         return categoryList;
       } else {
