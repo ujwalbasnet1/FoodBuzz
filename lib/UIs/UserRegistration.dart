@@ -5,7 +5,7 @@ import 'package:latlong/latlong.dart';
 
 import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantRegistrationRepo.dart';
 
-class RestaurantRegistration extends StatelessWidget {
+class UserRegistration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -16,24 +16,24 @@ class RestaurantRegistration extends StatelessWidget {
             'assets/images/foodbuzz.jpg',
             width: 200,
           ),
-          Text('Register as Restaurant',
+          Text('Register as User',
               style: TextStyle(
                   color: Color(0XFFD22030),
                   fontSize: 22,
                   fontWeight: FontWeight.bold)),
-          _RestaurantRegistrationForm(),
+          _UserRegistrationForm(),
         ],
       ),
     );
   }
 }
 
-class _RestaurantRegistrationForm extends StatefulWidget {
+class _UserRegistrationForm extends StatefulWidget {
   @override
   __LoginformState createState() => __LoginformState();
 }
 
-class __LoginformState extends State<_RestaurantRegistrationForm> {
+class __LoginformState extends State<_UserRegistrationForm> {
   final _formKey = GlobalKey<FormState>();
 
   final emailController = TextEditingController();
@@ -41,10 +41,10 @@ class __LoginformState extends State<_RestaurantRegistrationForm> {
   final nameController = TextEditingController();
   final addressController = TextEditingController();
   final phoneNumberController = TextEditingController();
-  final descriptionController = TextEditingController();
 
   bool _addressReceived = false;
   LatLng _latlng;
+  String gender = '';
 
   @override
   void initState() {
@@ -85,45 +85,23 @@ class __LoginformState extends State<_RestaurantRegistrationForm> {
                       hintText: 'Phone number',
                       controller: phoneNumberController),
                   SizedBox(height: 10),
-                  _textField(
-                      hintText: 'Description',
-                      controller: descriptionController,
-                      minLine: 6,
-                      maxLine: 9),
-                  SizedBox(height: 10),
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    child: RaisedButton(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 0, vertical: 14),
-                      textColor: Colors.white,
-                      color: _addressReceived ? Colors.green : Colors.black,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(_addressReceived
-                                ? Icons.check
-                                : Icons.location_on),
-                            SizedBox(width: 10),
-                            Text(_addressReceived
-                                ? 'Location Picked'
-                                : 'Pick a Location')
-                          ]),
-                      onPressed: () async {
-                        //  open a dialog for location picking
-                        _latlng = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LocationPicker()));
-
-                        if (_latlng != null) {
-                          setState(() {
-                            _addressReceived = true;
-                          });
-                        }
+                    child: DropdownButton(
+                      hint: Text((gender.length <= 0) ? 'Gender' : gender),
+                      isExpanded: true,
+                      items: [
+                        DropdownMenuItem(child: Text('Male'), value: 0),
+                        DropdownMenuItem(child: Text('Female'), value: 1),
+                      ],
+                      onChanged: (int value) {
+                        setState(() {
+                          gender = (value == 0) ? 'Male' : 'Female';
+                        });
                       },
                     ),
                   ),
+                  SizedBox(height: 10),
                   SizedBox(height: 10),
                   Container(
                     width: MediaQuery.of(context).size.width,
@@ -133,29 +111,28 @@ class __LoginformState extends State<_RestaurantRegistrationForm> {
                       textColor: Colors.white,
                       color: Color(0XFFD22030),
                       child: Text('Register'),
-                      onPressed: () {
+                      onPressed: () async {
                         // dispatch
-                        if (_latlng == null) {
-                          _latlng = new LatLng(0, 0);
-                        }
+                        // if (_latlng == null) {
+                        //   _latlng = new LatLng(0, 0);
+                        // }
 
-                        Restaurant _newRestaurant = new Restaurant(
-                            name: nameController.text,
-                            email: emailController.text,
-                            password: passwordController.text,
-                            address: addressController.text,
-                            phoneNumber: phoneNumberController.text,
-                            description: descriptionController.text,
-                            lat: _latlng.latitude.toString(),
-                            lng: _latlng.longitude.toString());
+                        // Restaurant _newRestaurant = new Restaurant(
+                        //     name: nameController.text,
+                        //     email: emailController.text,
+                        //     password: passwordController.text,
+                        //     address: addressController.text,
+                        //     phoneNumber: phoneNumberController.text,
+                        //     lat: _latlng.latitude.toString(),
+                        //     lng: _latlng.longitude.toString());
 
-                        // newRestaurant
+                        // // newRestaurant
 
-                        // repository call
-                        print('\n\n\n\n\n\n\nRegistration Button Clicked' +
-                            _newRestaurant.toJSON().toString());
-                        RestaurantRegistrationRepo()
-                            .register(restaurant: _newRestaurant);
+                        // // repository call
+                        // print('\n\n\n\n\n\n\nRegistration Button Clicked' +
+                        //     _newRestaurant.toJSON().toString());
+                        // RestaurantRegistrationRepo()
+                        //     .register(restaurant: _newRestaurant);
                       },
                     ),
                   ),

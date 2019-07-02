@@ -21,6 +21,7 @@ import 'UIs/CartItem.dart';
 import 'UIs/Postitem.dart';
 import 'UIs/RestaurantRegistration.dart';
 import 'UIs/Restaurantprofile.dart';
+import 'UIs/UserRegistration.dart';
 
 void main() => runApp(MyApp());
 
@@ -32,8 +33,15 @@ class MyApp extends StatelessWidget {
     );
 
     // return MaterialApp(
-    //   theme: ThemeData(fontFamily: 'Lato', primaryColor: Color(0XFFD22030)),
-    //   home: SafeArea(child: Scaffold(body: UserProfile())),
+    //   theme: ThemeData(
+    //     fontFamily: 'Lato',
+    //     primaryColor: Color(0XFFD22030),
+    //   ),
+    //   home: SafeArea(
+    //       child: Scaffold(
+    //     body: UserRegistration(),
+    //     backgroundColor: Colors.white,
+    //   )),
     // );
   }
 }
@@ -78,6 +86,7 @@ class _MainPageState extends State<MainPage> {
       bloc: authenticationBloc,
       child: MaterialApp(
         home: Scaffold(
+          backgroundColor: Colors.white,
           body: SafeArea(
             child: BlocBuilder<AuthenticationEvent, AuthenticationState>(
               bloc: authenticationBloc,

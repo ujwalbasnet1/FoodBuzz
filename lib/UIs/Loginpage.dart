@@ -6,6 +6,9 @@ import 'package:food_buzz/Blocs/Login/LoginEvent.dart';
 import 'package:food_buzz/Blocs/Login/LoginState.dart';
 import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 
+import 'RestaurantRegistration.dart';
+import 'UserRegistration.dart';
+
 class LoginPage extends StatelessWidget {
   final bool isRestaurant;
   final AuthenticationRepo authenticationRepo;
@@ -173,6 +176,26 @@ class __LoginformState extends State<_LoginForm> {
                             )
                           ],
                         ),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: RaisedButton(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 0, vertical: 14),
+                              textColor: Colors.white,
+                              color: Color(0XFFD22030),
+                              child: Text('Sign Up'),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Scaffold(
+                                              body: widget.isRestaurant
+                                                  ? RestaurantRegistration()
+                                                  : UserRegistration(),
+                                              backgroundColor: Colors.white,
+                                            )));
+                              }),
+                        )
                         // _buildBottomSection(),
                       ],
                     ),
