@@ -1,34 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:food_buzz/UIs/SearchWidget.dart';
 import '../TestData/TestData.dart';
+import 'SearchPage.dart';
 
 class StaggeredImageView extends StatelessWidget {
-  Widget _searchBar = Container(
-      // decoration:
-      //     BoxDecoration(border: Border.(color: Colors.black26, width: 2)),
-      child: ListTile(
-    leading: Icon(
-      Icons.search,
-      color: Colors.black,
-    ),
-    title: TextField(
-      textAlign: TextAlign.start,
-      style: TextStyle(fontSize: 20),
-      decoration: InputDecoration(
-        hintText: 'Search',
-        border: InputBorder.none,
-      ),
-    ),
-  ));
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0XFFFAFAFA),
         elevation: 0,
-        title: _searchBar,
+        title: InkWell(
+          onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => SearchPage()));
+          },
+          child: Container(
+            child: ListTile(
+              leading: Icon(
+                Icons.search,
+                color: Colors.black,
+              ),
+              title: Container(
+                child: Text('Search',
+                    style: TextStyle(fontSize: 20, color: Colors.black54)),
+              ),
+            ),
+          ),
+        ),
       ),
       body: Container(
         padding: EdgeInsets.only(top: 4),

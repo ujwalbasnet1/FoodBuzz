@@ -1,26 +1,24 @@
-class Restaurant {
+class User {
   String id;
+  String name;
   String email;
   String password;
-  String name;
-  String description;
+  String gender;
   String address;
   String phoneNumber;
+  String picture;
   String lat;
   String lng;
-  String picture;
-  String coverImg;
 
-  Restaurant({
+  User({
     this.id,
+    this.name,
     this.email,
     this.password,
-    this.name,
-    this.description,
+    this.gender,
     this.address,
     this.phoneNumber,
     this.picture,
-    this.coverImg,
     this.lat,
     this.lng,
   });
@@ -30,11 +28,9 @@ class Restaurant {
       'email': email,
       'password': password,
       'name': name,
-      'description': description,
+      'gender': gender,
       'address': address,
       'phone_number': phoneNumber,
-      'lat': lat,
-      'lng': lng
     };
   }
 }

@@ -1,25 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:food_buzz/Models/Cart.dart';
 import 'package:food_buzz/Models/DishCategories.dart';
 import 'package:food_buzz/Models/Restaurant.dart';
 import 'package:food_buzz/Models/FoodItem.dart';
 import 'package:food_buzz/Repo/AuthenticationRepo.dart';
 import 'package:food_buzz/Repo/RestaurantRepositories/RestaurantProfileRepo.dart';
+import 'package:food_buzz/Repo/UserRepositories/User_RestaurantProfileRepo.dart';
 import 'package:food_buzz/UIs/AddDish.dart';
-import 'package:food_buzz/UIs/restaurantitem.dart';
+import 'package:food_buzz/UIs/Restaurantitem.dart';
 
 import 'package:sticky_headers/sticky_headers.dart';
 
 import '../const.dart';
 
 class RestaurantProfile extends StatefulWidget {
+  var repo;
+
+  RestaurantProfile({@required this.repo});
+
   @override
   _RestaurantProfileState createState() => _RestaurantProfileState();
 }
 
 class _RestaurantProfileState extends State<RestaurantProfile> {
-  final RestaurantProfileRepo _restaurantProfileRepo =
-      RestaurantProfileRepo(authenticationRepo: AuthenticationRepo());
+  var _restaurantProfileRepo;
+  String restaurantName = '';
 
   List<FoodItem> foodList = [];
   DishCategories _dishCategories = DishCategories();
@@ -27,6 +33,7 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
   @override
   void initState() {
     super.initState();
+    _restaurantProfileRepo = widget.repo;
   }
 
   @override
@@ -102,7 +109,11 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
                           return Container(
                               color: Colors.red, width: 200, height: 200);
                         } else {
-                          return CircularProgressIndicator();
+                          return Container(
+                            height: 100,
+                            width: 100,
+                            child: CircularProgressIndicator(),
+                          );
                         }
                       },
                     ),
@@ -113,6 +124,8 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, int index) {
                         return _foodItemBuilder(_FoodItem(
+                            id: _dishCategories.dishes[index].id,
+                            restaurantName: restaurantName,
                             name: _dishCategories.dishes[index].name,
                             picURL: _dishCategories.dishes[index].picture
                                     .contains('http')
@@ -129,15 +142,17 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
         Positioned(
           bottom: 10,
           right: 10,
-          child: FloatingActionButton(
-            onPressed: () {
-              _restaurantProfileRepo.getCategoriesDishes();
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => AddDish()));
-            },
-            child: Icon(Icons.add, color: Colors.white),
-            backgroundColor: Color(0XFFD22030),
-          ),
+          child: (_restaurantProfileRepo is RestaurantProfileRepo)
+              ? FloatingActionButton(
+                  onPressed: () {
+                    _restaurantProfileRepo.getCategoriesDishes();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => AddDish()));
+                  },
+                  child: Icon(Icons.add, color: Colors.white),
+                  backgroundColor: Color(0XFFD22030),
+                )
+              : Container(),
         )
       ],
     ));
@@ -186,7 +201,22 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
                         fontWeight: FontWeight.bold,
                         color: Color(0XFF333333))),
                 SizedBox(height: 10),
-                Icon(Icons.add_shopping_cart, size: 24),
+                InkWell(
+                    onTap: () {
+                      if (_restaurantProfileRepo
+                          is User_RestaurantProfileRepo) {
+                        (_restaurantProfileRepo as User_RestaurantProfileRepo)
+                            .saveToCart(CartItemModel.createNew(FoodItem(
+                          restaurantId: _restaurantProfileRepo.id,
+                          picture: foodItem.picURL,
+                          name: foodItem.name,
+                          price: foodItem.price,
+                          id: foodItem.id,
+                          restaurantName: foodItem.restaurantName,
+                        )));
+                      }
+                    },
+                    child: Icon(Icons.add_shopping_cart, size: 24)),
               ]),
         ],
       ),
@@ -198,6 +228,8 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
       future: _restaurantProfileRepo.getProfile(),
       builder: (BuildContext context, AsyncSnapshot<Restaurant> snapshot) {
         if (snapshot.hasData) {
+          restaurantName = snapshot.data.name;
+
           return Stack(
             children: <Widget>[
               Container(
@@ -242,10 +274,18 @@ class _RestaurantProfileState extends State<RestaurantProfile> {
 }
 
 class _FoodItem {
+  String id;
   String picURL;
   String name;
   String price;
   String tagName;
+  String restaurantName;
 
-  _FoodItem({this.picURL, this.name, this.price, this.tagName});
+  _FoodItem(
+      {this.restaurantName,
+      this.id,
+      this.picURL,
+      this.name,
+      this.price,
+      this.tagName});
 }

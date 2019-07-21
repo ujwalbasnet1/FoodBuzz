@@ -33,10 +33,10 @@ class MyApp extends StatelessWidget {
     );
 
     // return MaterialApp(
-    //   theme: ThemeData(
-    //     fontFamily: 'Lato',
-    //     primaryColor: Color(0XFFD22030),
-    //   ),
+//       theme: ThemeData(
+//         fontFamily: 'Lato',
+//         primaryColor: Color(0XFFD22030),
+//       ),
     //   home: SafeArea(
     //       child: Scaffold(
     //     body: UserRegistration(),
@@ -85,6 +85,11 @@ class _MainPageState extends State<MainPage> {
     return BlocProvider<AuthenticationBloc>(
       bloc: authenticationBloc,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          fontFamily: 'Lato',
+          primaryColor: Color(0XFFD22030),
+        ),
         home: Scaffold(
           backgroundColor: Colors.white,
           body: SafeArea(

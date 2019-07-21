@@ -89,7 +89,7 @@ class __LoginformState extends State<_LoginForm> {
                 SnackBar(
                   content: Text('${state.error}'),
                   backgroundColor: Colors.red,
-                  duration: Duration(milliseconds: 250),
+                  duration: Duration(milliseconds: 800),
                 ),
               );
             });
@@ -147,6 +147,7 @@ class __LoginformState extends State<_LoginForm> {
                             child: Text('Log In'),
                             onPressed: () {
                               // dispatch
+                              print('LoginPressed');
                               if (!(state is LoginLoading)) {
                                 _loginBloc.dispatch(LoginButtonPressed(
                                   username: usernameController.text,

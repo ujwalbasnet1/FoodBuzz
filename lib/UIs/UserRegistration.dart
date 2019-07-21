@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_buzz/Models/Restaurant.dart';
+import 'package:food_buzz/Models/User.dart';
+import 'package:food_buzz/Repo/UserRepositories/UserRegisterationRepo.dart';
 import 'package:food_buzz/UIs/LocationPickerPage.dart';
 import 'package:latlong/latlong.dart';
 
@@ -112,27 +114,29 @@ class __LoginformState extends State<_UserRegistrationForm> {
                       color: Color(0XFFD22030),
                       child: Text('Register'),
                       onPressed: () async {
-                        // dispatch
-                        // if (_latlng == null) {
-                        //   _latlng = new LatLng(0, 0);
-                        // }
+//                         dispatch
+                        if (_latlng == null) {
+                          _latlng = new LatLng(0, 0);
+                        }
 
-                        // Restaurant _newRestaurant = new Restaurant(
-                        //     name: nameController.text,
-                        //     email: emailController.text,
-                        //     password: passwordController.text,
-                        //     address: addressController.text,
-                        //     phoneNumber: phoneNumberController.text,
-                        //     lat: _latlng.latitude.toString(),
-                        //     lng: _latlng.longitude.toString());
+                        User _newUser = new User(
+                          name: nameController.text,
+                          email: emailController.text,
+                          gender: gender,
+                          password: passwordController.text,
+                          address: addressController.text,
+                          phoneNumber: phoneNumberController.text,
+                        );
 
-                        // // newRestaurant
+                        // newUser
 
-                        // // repository call
-                        // print('\n\n\n\n\n\n\nRegistration Button Clicked' +
-                        //     _newRestaurant.toJSON().toString());
-                        // RestaurantRegistrationRepo()
-                        //     .register(restaurant: _newRestaurant);
+                        // repository call
+                        print('\n\n\n\n\n\n\nRegistration Button Clicked' +
+                            _newUser.toJSON().toString());
+
+                        UserRegistrationRepo().register(user: _newUser);
+
+                        print('\n\n\n\nEnd');
                       },
                     ),
                   ),
