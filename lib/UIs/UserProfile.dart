@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:food_buzz/Models/User.dart';
+import 'package:food_buzz/Repo/AuthenticationRepo.dart';
+import 'package:food_buzz/Repo/UserRepositories/UserRepos.dart';
+import 'package:food_buzz/Repo/UserRepositories/User_RestaurantProfileRepo.dart';
 import 'package:food_buzz/TestData/TestData.dart';
 import 'package:food_buzz/UIs/Postitem.dart';
 import 'package:food_buzz/UIs/StaggeredImageView.dart';
+import 'package:location/location.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:food_buzz/Blocs/bloc.dart';
 
+import '../const.dart';
 import 'CartItem.dart';
+import 'Personitem.dart';
+import 'Restaurantitem.dart';
+import 'Restaurantprofile.dart';
+import 'UserProfile_Guest.dart';
 
 class UserProfile extends StatefulWidget {
   @override
@@ -15,18 +25,27 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
-  var childrenWidget = [
-    _profile(),
-    StaggeredImageView(),
-    StaggeredImageView(),
-    StaggeredImageView(),
-    _profile()
-  ];
-
   int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<LocationData>(
+      future: Location().getLocation(),
+      builder: (BuildContext context, AsyncSnapshot<LocationData> snapshot) {
+        if (snapshot.hasData) {
+          print('Latitude: ' +
+              snapshot.data.latitude.toString() +
+              '\nLongitude: ' +
+              snapshot.data.longitude.toString());
+
+          UserRepos().updateLocation(location: snapshot.data);
+        }
+        return getBody();
+      },
+    );
+  }
+
+  Widget getBody() {
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         unselectedItemColor: Colors.grey,
@@ -58,7 +77,13 @@ class _UserProfileState extends State<UserProfile> {
           ),
         ],
       ),
-      body: childrenWidget[_currentIndex],
+      body: [
+        _profile(),
+        StaggeredImageView(),
+        getUserNearBy(),
+        getRestaurantNearBy(),
+        _profile()
+      ][_currentIndex],
       drawer: Drawer(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,79 +150,224 @@ class _UserProfileState extends State<UserProfile> {
       ),
     );
   }
+
+  Widget _profile() {
+    return NestedScrollView(
+      physics: ClampingScrollPhysics(),
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return <Widget>[
+          SliverAppBar(
+            floating: false,
+            pinned: false,
+            title: Text('Food Buzz'),
+          ),
+        ];
+      },
+      body: FutureBuilder(
+        future: UserRepos().getProfile(),
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          return ListView.builder(
+              itemCount: 7,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) {
+                  return Stack(
+                    children: <Widget>[
+                      Container(height: 150),
+                      Container(
+                        color: Color(0XFFd22030),
+                        height: 94,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: (MediaQuery.of(context).size.width * 0.5) - 56,
+                        child: snapshot.hasData
+                            ? Container(
+                                width: 112.0,
+                                height: 112.0,
+                                decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image: NetworkImage(snapshot
+                                                .data.picture
+                                                .contains('http')
+                                            ? snapshot.data.picture
+                                            : Constant.baseURLB +
+                                                snapshot.data.picture))),
+                              )
+                            : Container(
+                                width: 112.0,
+                                height: 112.0,
+                                decoration: new BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey.withOpacity(0.85),
+                                ),
+                              ),
+                      )
+                    ],
+                  );
+                } else if (index == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: <Widget>[
+                        snapshot.hasData
+                            ? Text(
+                                snapshot.data.name,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Lato'),
+                              )
+                            : Container(
+                                width: 200,
+                                height: 18,
+                                color: Colors.grey.withOpacity(0.85)),
+                      ],
+                    ),
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PostItem(
+                      name: 'Samjhana Pokharel',
+                      img: TestData.getImageList()[index],
+                      ago: '2hrs ago'),
+                );
+              });
+        },
+      ),
+    );
+  }
+
+  Widget getRestaurantNearBy() {
+    return FutureBuilder(
+      future: UserRepos().getNearByRestaurant(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          List<_Restaurant> restaurantList = rawToRestaurantList(snapshot.data);
+
+          return ListView.builder(
+            itemCount: restaurantList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RestaurantProfile(
+                            repo: User_RestaurantProfileRepo(
+                              authenticationRepo: AuthenticationRepo(),
+                              id: restaurantList[index].id.toString(),
+                            ),
+                          ),
+                    ),
+                  );
+                },
+                child: RestaurantItem(
+                  name: restaurantList[index].name,
+                  img: restaurantList[index].picture,
+                  location: restaurantList[index].address,
+                ),
+              );
+            },
+          );
+        }
+
+        return Container();
+      },
+    );
+  }
+
+  Widget getUserNearBy() {
+    return FutureBuilder(
+      future: UserRepos().getNearByUser(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          List<_User> userList = rawToUserList(snapshot.data);
+
+          return ListView.builder(
+            itemCount: userList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserProfileGuest(
+                            userID: userList[index].id.toString(),
+                          ),
+                    ),
+                  );
+                },
+                child: PersonItem(
+                  name: userList[index].name,
+                  img: userList[index].picture,
+                  isFollowing: false,
+                ),
+              );
+            },
+          );
+        }
+
+        return Container();
+      },
+    );
+  }
+
+  List<_Restaurant> rawToRestaurantList(dynamic rawData) {
+    List<_Restaurant> restaurantList = [];
+
+    for (int i = 0; i < rawData.length; i++) {
+      restaurantList.add(_Restaurant(
+        id: rawData[i]['id'],
+        name: rawData[i]['name'],
+        picture: rawData[i]['picture'],
+        address: rawData[i]['address'],
+      ));
+    }
+
+    return restaurantList;
+  }
+
+  List<_User> rawToUserList(dynamic rawData) {
+    List<_User> userList = [];
+
+    for (int i = 0; i < rawData.length; i++) {
+      userList.add(_User(
+        id: rawData[i]['id'],
+        name: rawData[i]['name'],
+        picture: rawData[i]['picture'],
+      ));
+    }
+
+    return userList;
+  }
 }
 
-Widget _profile() {
-  Widget circularimg = Container(
-      width: 112.0,
-      height: 112.0,
-      decoration: new BoxDecoration(
-          shape: BoxShape.circle,
-          image: new DecorationImage(
-              fit: BoxFit.fill,
-              image: NetworkImage(TestData.getImageList()[0]))));
+class _Restaurant {
+  String id;
+  String name;
+  String picture;
+  String address;
 
-  return NestedScrollView(
-    physics: ClampingScrollPhysics(),
-    headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-      return <Widget>[
-        SliverAppBar(
-          floating: false,
-          pinned: false,
-          title: Text('Food Buzz'),
-        ),
-      ];
-    },
-    body: ListView.builder(
-        itemCount: 7,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == 0) {
-            return Stack(
-              children: <Widget>[
-                Container(height: 150),
-                Container(
-                  color: Color(0XFFd22030),
-                  height: 94,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: (MediaQuery.of(context).size.width * 0.5) - 56,
-                  child: circularimg,
-                )
-              ],
-            );
-          } else if (index == 1) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    'Samjhana Pokharel',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Lato'),
-                  ),
-                  Container(
-                    color: Color(0XFFD22030),
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 32),
-                    child: Text(
-                      'Follow',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: PostItem(
-                name: 'Samjhana Pokharel',
-                img: TestData.getImageList()[index],
-                ago: '2hrs ago'),
-          );
-        }),
-  );
+  _Restaurant({this.id, this.name, this.picture, this.address});
+
+  @override
+  String toString() {
+    return '{name: $name, picture: $picture, address: $address}';
+  }
+}
+
+class _User {
+  String id;
+  String name;
+  String picture;
+
+  _User({this.id, this.name, this.picture});
+
+  @override
+  String toString() {
+    return '{name: $name, picture: $picture}';
+  }
 }

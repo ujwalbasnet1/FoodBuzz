@@ -147,7 +147,6 @@ class __LoginformState extends State<_LoginForm> {
                             child: Text('Log In'),
                             onPressed: () {
                               // dispatch
-                              print('LoginPressed');
                               if (!(state is LoginLoading)) {
                                 _loginBloc.dispatch(LoginButtonPressed(
                                   username: usernameController.text,

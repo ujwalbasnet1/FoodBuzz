@@ -60,12 +60,13 @@ class _AddDishFormState extends State<AddDishForm> {
   void uploadPic() {
     Dio dio = new Dio();
 
-    FormData formdata = new FormData(); // just like JS
+    FormData formData = new FormData(); // just like JS
 
-    formdata.add("myFile", new UploadFileInfo(_image, (_image.path)));
+    formData.add("myFile", new UploadFileInfo(_image, (_image.path)));
+
     dio.post(
       Constant.baseURL + "file",
-      data: formdata,
+      data: formData,
       options: Options(
           method: 'POST',
           responseType: ResponseType.json // or ResponseType.JSON
@@ -77,7 +78,6 @@ class _AddDishFormState extends State<AddDishForm> {
         });
       },
     ).then((Response response) {
-      print('\n\n\n\n\n\n\n\n\nxxx');
       _dish.imageURL = (response.data['URL']);
       setState(() {
         _progressing = false;

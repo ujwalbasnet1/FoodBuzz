@@ -27,11 +27,9 @@ class UserRegistrationRepo {
         // return (jsonDecode(response.body)['message']);
         print(jsonDecode(registerResponse.body)['message']);
       } else {
-        // return Future.error(jsonDecode(response.body)['message']);
-        print(jsonDecode(registerResponse.body)['message']);
+        return Future.error(jsonDecode(registerResponse.body)['message']);
       }
     } catch (error) {
-      print(error);
       return error.toString();
     }
   }

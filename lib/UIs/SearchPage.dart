@@ -7,6 +7,8 @@ import '../const.dart';
 import 'Personitem.dart';
 import 'Restaurantitem.dart';
 import 'Restaurantprofile.dart';
+import 'UserProfile.dart';
+import 'UserProfile_Guest.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -121,6 +123,15 @@ class _SearchPageState extends State<SearchPage> {
           onTap: () {
             print(
                 '\n\n\n\nUser Clicked: ' + this.userList[index].id.toString());
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserProfileGuest(
+                      userID: this.userList[index].id.toString(),
+                    ),
+              ),
+            );
           },
           child: PersonItem(
             name: this.userList[index].name,

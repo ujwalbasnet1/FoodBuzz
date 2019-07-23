@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:food_buzz/Models/Cart.dart';
-import 'package:food_buzz/Repo/AuthenticationRepo.dart';
-import 'package:food_buzz/Repo/UserRepositories/User_RestaurantProfileRepo.dart';
+import 'package:food_buzz/Database/Cart.dart';
+
+import 'package:food_buzz/Database/database.dart';
 
 import '../const.dart';
 
@@ -12,31 +12,49 @@ class CartItem extends StatefulWidget {
 }
 
 class _CartItemState extends State<CartItem> {
-  @override
-  void initState() {
-    super.initState();
+  AppDatabase database;
+
+  Future<List<Cart>> getDAO() async {
+    database =
+        await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+    var cartDAO = database.cartDao;
+    if (cartDAO == null) {
+      print('\n\n\nIs Null');
+    } else {
+      print('\n\n\nIs Not Null');
+    }
+
+    return cartDAO.getCart();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Cart>(
-        future: User_RestaurantProfileRepo(
-          authenticationRepo: AuthenticationRepo(),
-        ).getFromCart(),
+      body: FutureBuilder<List<Cart>>(
+        future: getDAO(),
         builder: (BuildContext context, var snapshot) {
           if (snapshot.hasData) {
-            print(snapshot.data);
+            double _totalPrice = 0;
+
+            snapshot.data.forEach((cart) {
+              _totalPrice += cart.unit_price * cart.product_count;
+            });
+
+            order(_totalPrice, snapshot.data);
+
             return Stack(
               children: <Widget>[
-                ListView.builder(
-                  itemCount: snapshot.data.foodItems.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: _ItemBuilder(snapshot.data.foodItems[index]),
-                    );
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: _ItemBuilder(snapshot.data[index]),
+                      );
+                    },
+                  ),
                 ),
                 Positioned(
                     bottom: 0,
@@ -62,7 +80,7 @@ class _CartItemState extends State<CartItem> {
                             color: Colors.white,
                           ),
                           Text(
-                            'Rs.' + snapshot.data.totalPrice.toInt().toString(),
+                            'Rs.' + _totalPrice.toInt().toString(),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -82,102 +100,140 @@ class _CartItemState extends State<CartItem> {
       ),
     );
   }
-}
 
-Widget _ItemBuilder(CartItemModel item) {
-  return Stack(
-    children: <Widget>[
-      Container(
-        decoration: BoxDecoration(
-          color: Color(0XFFe5e9ea).withOpacity(0.6),
-          borderRadius: BorderRadius.circular(1),
-        ),
-        padding: EdgeInsets.only(top: 8, right: 16, left: 8, bottom: 8),
-        height: 96,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Image.network(
-              (item.foodItem.picture.contains('http'))
-                  ? item.foodItem.picture
-                  : Constant.baseURLB + item.foodItem.picture,
-              width: 64,
-              height: 72,
-              fit: BoxFit.cover,
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(item.foodItem.name,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Lato')),
-                      Text(item.foodItem.restaurantName,
-                          style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 12,
-                              fontFamily: 'Lato')),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        'Rs.' + item.foodItem.price,
-                        style: TextStyle(color: Colors.black45),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            border:
-                                Border.all(width: 1, color: Colors.black26)),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(
-                              Icons.remove,
-                              color: Colors.black45,
-                            ),
-                            SizedBox(width: 12),
-                            Text(
-                              item.count.toString(),
-                              style: TextStyle(color: Colors.black45),
-                            ),
-                            SizedBox(width: 12),
-                            Icon(
-                              Icons.add,
-                              color: Colors.black45,
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ],
+  Widget _ItemBuilder(Cart item) {
+    return Stack(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            color: Color(0XFFe5e9ea).withOpacity(0.6),
+            borderRadius: BorderRadius.circular(1),
+          ),
+          padding: EdgeInsets.only(top: 8, right: 16, left: 8, bottom: 8),
+          height: 96,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Image.network(
+                (item.picture.contains('http'))
+                    ? item.picture
+                    : Constant.baseURLB + item.picture,
+                width: 64,
+                height: 72,
+                fit: BoxFit.cover,
               ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(item.name,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Lato')),
+                        Text(item.restaurant_name,
+                            style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 12,
+                                fontFamily: 'Lato')),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Rs.' + item.unit_price.toString(),
+                          style: TextStyle(color: Colors.black45),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              border:
+                                  Border.all(width: 1, color: Colors.black26)),
+                          child: Row(
+                            children: <Widget>[
+                              InkWell(
+                                onTap: () async {
+                                  if (item.product_count > 1)
+                                    await database.cartDao
+                                        .decreaseCartItem(item.id);
+                                  else
+                                    await database.cartDao.deleteCart(item.id);
+
+                                  setState(() {});
+                                },
+                                child: Icon(
+                                  Icons.remove,
+                                  color: Colors.black45,
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Text(
+                                item.product_count.toString(),
+                                style: TextStyle(color: Colors.black45),
+                              ),
+                              SizedBox(width: 12),
+                              InkWell(
+                                onTap: () async {
+                                  await database.cartDao
+                                      .increaseCartItem(item.id);
+                                  setState(() {});
+                                },
+                                child: Icon(
+                                  Icons.add,
+                                  color: Colors.black45,
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          child: InkWell(
+            onTap: () async {
+              await database.cartDao.deleteCart(item.id);
+              setState(() {});
+            },
+            child: Icon(
+              Icons.close,
+              color: Colors.black45,
+              size: 16,
             ),
-          ],
+          ),
+          right: 16,
+          top: 8,
         ),
-      ),
-      Positioned(
-        child: Icon(
-          Icons.close,
-          color: Colors.black45,
-          size: 16,
-        ),
-        right: 16,
-        top: 8,
-      ),
-    ],
-  );
+      ],
+    );
+  }
+
+  void order(double totalPrice, List<Cart> cartList) {
+    String toJSON = '{'
+        'total_price: $totalPrice,'
+        'food_items: [';
+
+    cartList.forEach((cart) {
+      toJSON += cart.toJSON().toString() + ',';
+    });
+
+    toJSON += '],}';
+
+    print(toJSON);
+  }
 }
 
 /**

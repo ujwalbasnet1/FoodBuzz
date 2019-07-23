@@ -134,7 +134,19 @@ class __LoginformState extends State<_UserRegistrationForm> {
                         print('\n\n\n\n\n\n\nRegistration Button Clicked' +
                             _newUser.toJSON().toString());
 
-                        UserRegistrationRepo().register(user: _newUser);
+                        UserRegistrationRepo()
+                            .register(user: _newUser)
+                            .catchError((error) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            Scaffold.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(error.toString()),
+                                backgroundColor: Colors.red,
+                                duration: Duration(milliseconds: 1000),
+                              ),
+                            );
+                          });
+                        });
 
                         print('\n\n\n\nEnd');
                       },

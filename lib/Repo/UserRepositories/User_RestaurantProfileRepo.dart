@@ -1,4 +1,3 @@
-import 'package:food_buzz/Models/Cart.dart';
 import 'package:food_buzz/Models/Dish.dart';
 import 'package:food_buzz/Models/DishCategories.dart';
 import 'package:food_buzz/Models/FoodItem.dart';
@@ -109,31 +108,31 @@ class User_RestaurantProfileRepo {
       throw Future.error(error.toString());
     }
   }
-
-  Future<bool> saveToCart(CartItemModel model) async {
-    final prefs = await SharedPreferences.getInstance();
-    var oldCartString = prefs.getString('cart') ?? '';
-    Cart oldCart =
-        (oldCartString.length > 0) ? Cart.fromJSON(oldCartString) : Cart();
-
-    oldCart.foodItems.add(model);
-
-    print('\n\n\nSaved');
-
-    print(oldCart.toJSON());
-
-    return prefs.setString('cart', oldCart.toJSON());
-  }
-
-  Future<Cart> getFromCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    var oldCartString = prefs.getString('cart') ?? '';
-    Cart oldCart = (oldCartString.length > 0) ? Cart() : Cart();
-
-    return Cart();
-  }
-
 //
+//  Future<bool> saveToCart(CartItemModel model) async {
+//    final prefs = await SharedPreferences.getInstance();
+//    var oldCartString = prefs.getString('cart') ?? '';
+//    Cart oldCart =
+//        (oldCartString.length > 0) ? Cart.fromJSON(oldCartString) : Cart();
+//
+//    oldCart.foodItems.add(model);
+//
+//    print('\n\n\nSaved');
+//
+//    print(oldCart.toJSON());
+//
+//    return prefs.setString('cart', oldCart.toJSON());
+//  }
+//
+//  Future<Cart> getFromCart() async {
+//    final prefs = await SharedPreferences.getInstance();
+//    var oldCartString = prefs.getString('cart') ?? '';
+//    Cart oldCart = (oldCartString.length > 0) ? Cart() : Cart();
+//
+//    return Cart();
+//  }
+//
+////
 //  Future<List<Map<String, String>>> getCategories(String id) async {
 //    final String _registrationURL = baseURL + 'categories/' + id;
 //

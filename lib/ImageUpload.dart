@@ -44,8 +44,8 @@ class _ImageUploadState extends State<ImageUpload>
             });
           },
         )
-        .then((response) => print(response))
-        .catchError((error) => print(error));
+        .then((response) => {})
+        .catchError((error) => {});
   }
 
   @override
