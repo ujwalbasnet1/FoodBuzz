@@ -29,4 +29,7 @@ abstract class CartDAO {
 
   @Query('UPDATE cart set product_count = product_count - 1 WHERE id = :id')
   Future<void> decreaseCartItem(int id);
+
+  @Query('DELETE FROM cart')
+  Future<void> clearCart();
 }

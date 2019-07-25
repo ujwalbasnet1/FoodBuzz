@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:food_buzz/Repo/UserRepositories/UserRepos.dart';
+
+import '../const.dart';
 
 class PostItem extends StatefulWidget {
-  final String img, name, ago;
+  final FeedItemModel data;
 
-  PostItem({@required this.name, @required this.img, @required this.ago});
+  PostItem({@required this.data});
 
   @override
   _PostItemState createState() => _PostItemState();
@@ -35,11 +38,16 @@ class _PostItemState extends State<PostItem>
       });
 
     postedImageSize = new Size(0, 0);
+    isLit = widget.data.liked;
   }
 
   @override
   Widget build(BuildContext context) {
     double _height = postedImageSize.height ?? 0;
+
+    String _img = widget.data.profilePicture.contains('http')
+        ? widget.data.profilePicture
+        : Constant.baseURLB + widget.data.profilePicture;
 
     Widget circularImg = Container(
         width: 64.0,
@@ -47,9 +55,10 @@ class _PostItemState extends State<PostItem>
         decoration: new BoxDecoration(
             shape: BoxShape.circle,
             image: new DecorationImage(
-                fit: BoxFit.fill, image: NetworkImage(widget.img))));
+                fit: BoxFit.fill, image: NetworkImage(_img))));
 
     return Container(
+      margin: EdgeInsets.all(6),
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(1),
@@ -80,7 +89,7 @@ class _PostItemState extends State<PostItem>
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Text(
-                            widget.name,
+                            widget.data.name,
                             style: TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,
@@ -90,7 +99,7 @@ class _PostItemState extends State<PostItem>
                             height: 4,
                           ),
                           Text(
-                            widget.ago,
+                            widget.data.time,
                             style: TextStyle(fontSize: 12, fontFamily: 'Lato'),
                           ),
                         ],
@@ -117,34 +126,39 @@ class _PostItemState extends State<PostItem>
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                'Food is happiness',
-                style: TextStyle(fontSize: 14, fontFamily: 'Play'),
-                maxLines: 2,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(widget.data.dishName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.bold,
+                  )),
             ),
             InkWell(
                 onDoubleTap: () {
-                  setState(() {
-                    isLit = true;
-                    postedImageSize = _imageContainerKey.currentContext.size;
-                    _height = postedImageSize.height;
-                  });
-
-                  setState(() {
-                    animationController.reset();
-                    animationController.forward();
-//                heartAnimationController.reset();
-                    Future.delayed(Duration(milliseconds: 1000), () {
+                  UserRepos().like(widget.data.id).then((value) {
+                    setState(() {
                       animationController.reset();
+                      animationController.forward();
+                      Future.delayed(Duration(milliseconds: 1000), () {
+                        animationController.reset();
+                      });
+                    });
+
+                    setState(() {
+                      isLit = true;
+
+                      postedImageSize = _imageContainerKey.currentContext.size;
+                      _height = postedImageSize.height;
                     });
                   });
                 },
                 child: Stack(
                   children: <Widget>[
                     Image.network(
-                      widget.img,
+                      widget.data.dishPicture.contains('http')
+                          ? widget.data.dishPicture
+                          : Constant.baseURLB + widget.data.dishPicture,
                       width: MediaQuery.of(context).size.width,
                       fit: BoxFit.fitWidth,
                       key: _imageContainerKey,
@@ -164,7 +178,32 @@ class _PostItemState extends State<PostItem>
                       ),
                     )
                   ],
-                ))
+                )),
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: widget.data.likes > 0
+                  ? Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.whatshot,
+                          size: 16,
+                          color: isLit
+                              ? Colors.deepOrange.withOpacity(0.75)
+                              : Colors.grey,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          widget.data.likes.toString(),
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: isLit
+                                  ? Colors.deepOrange.withOpacity(0.75)
+                                  : Colors.grey),
+                        )
+                      ],
+                    )
+                  : Container(),
+            )
           ],
         ),
       ),

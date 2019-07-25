@@ -41,10 +41,10 @@ class _SearchPageState extends State<SearchPage> {
 
     rawUsers.forEach((rawUser) {
       _userList.add(_User(
-        id: rawUser['id'],
-        name: rawUser['name'],
-        picture: rawUser['picture'],
-      ));
+          id: rawUser['id'],
+          name: rawUser['name'],
+          picture: rawUser['picture'],
+          following: rawUser['following']));
     });
 
     // restaurants
@@ -136,7 +136,7 @@ class _SearchPageState extends State<SearchPage> {
           child: PersonItem(
             name: this.userList[index].name,
             img: this.userList[index].picture,
-            isFollowing: false,
+            isFollowing: this.userList[index].following,
           ),
         );
       },
@@ -200,12 +200,13 @@ class _User {
   int id;
   String name;
   String picture;
+  bool following;
 
-  _User({this.id, this.name, this.picture});
+  _User({this.id, this.name, this.picture, this.following});
 
   @override
   String toString() {
-    return '{name: $name, picture: $picture}';
+    return '{name: $name, picture: $picture, following: $following}';
   }
 }
 

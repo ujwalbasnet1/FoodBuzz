@@ -16,6 +16,8 @@ class UserProfileGuest extends StatefulWidget {
 }
 
 class _UserProfileGuestState extends State<UserProfileGuest> {
+  bool _isDisabled = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,11 +25,9 @@ class _UserProfileGuestState extends State<UserProfileGuest> {
         body: FutureBuilder<User>(
           future: UserRepos().getProfileByID(widget.userID),
           builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-            print('\n\n\n\nFrom Guest');
-
             if (snapshot.hasData) {
               return ListView.builder(
-                  itemCount: 7,
+                  itemCount: 3,
                   itemBuilder: (BuildContext context, int index) {
                     if (index == 0) {
                       return Stack(
@@ -84,32 +84,50 @@ class _UserProfileGuestState extends State<UserProfileGuest> {
                                     width: 200,
                                     height: 18,
                                     color: Colors.grey.withOpacity(0.85)),
-                            Container(
-                              color: Color(0XFFD22030),
-                              margin: EdgeInsets.symmetric(vertical: 8),
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 32),
-                              child: Text(
-                                'Follow',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
                           ],
                         ),
                       );
                     }
+
                     return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PostItem(
-                          name: 'Samjhana Pokharel',
-                          img: TestData.getImageList()[index],
-                          ago: '2hrs ago'),
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: _FeedList(widget.userID),
                     );
                   });
             }
 
-            return Center(child: CircularProgressIndicator());
+            return CircularProgressIndicator();
           },
         ));
+  }
+}
+
+class _FeedList extends StatefulWidget {
+  String friendID;
+
+  _FeedList(this.friendID);
+
+  @override
+  __FeedListState createState() => __FeedListState();
+}
+
+class __FeedListState extends State<_FeedList> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: UserRepos().friendFeeds(widget.friendID.toString()),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<FeedItemModel>> snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                shrinkWrap: true,
+                physics: ClampingScrollPhysics(),
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return PostItem(data: snapshot.data[index]);
+                });
+          }
+          return Container();
+        });
   }
 }

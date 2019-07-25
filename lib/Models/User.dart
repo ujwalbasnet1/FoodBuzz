@@ -9,19 +9,20 @@ class User {
   String picture;
   String lat;
   String lng;
+  bool following;
 
-  User({
-    this.id,
-    this.name,
-    this.email,
-    this.password,
-    this.gender,
-    this.address,
-    this.phoneNumber,
-    this.picture,
-    this.lat,
-    this.lng,
-  });
+  User(
+      {this.id,
+      this.name,
+      this.email,
+      this.password,
+      this.gender,
+      this.address,
+      this.phoneNumber,
+      this.picture,
+      this.lat,
+      this.lng,
+      this.following});
 
   dynamic toJSON() {
     return {
@@ -31,6 +32,7 @@ class User {
       'gender': gender,
       'address': address,
       'phone_number': phoneNumber,
+      'following': following
     };
   }
 }

@@ -156,6 +156,11 @@ class _$CartDAO extends CartDAO {
   }
 
   @override
+  Future<void> clearCart() async {
+    await _queryAdapter.queryNoReturn('DELETE FROM cart');
+  }
+
+  @override
   Future<void> insertCart(Cart cart) async {
     await _cartInsertionAdapter.insert(cart, sqflite.ConflictAlgorithm.abort);
   }

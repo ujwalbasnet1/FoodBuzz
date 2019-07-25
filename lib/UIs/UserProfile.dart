@@ -78,11 +78,11 @@ class _UserProfileState extends State<UserProfile> {
         ],
       ),
       body: [
-        _profile(),
+        _Feeds(),
         StaggeredImageView(),
-        getUserNearBy(),
-        getRestaurantNearBy(),
-        _profile()
+        _NearByUser(),
+        _NearByRestaurant(),
+        _Profile()
       ][_currentIndex],
       drawer: Drawer(
         child: Column(
@@ -150,8 +150,75 @@ class _UserProfileState extends State<UserProfile> {
       ),
     );
   }
+}
 
-  Widget _profile() {
+class _Feeds extends StatefulWidget {
+  @override
+  __FeedsState createState() => __FeedsState();
+}
+
+class __FeedsState extends State<_Feeds> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<FeedItemModel>>(
+      future: UserRepos().feeds(),
+      builder:
+          (BuildContext context, AsyncSnapshot<List<FeedItemModel>> snapshot) {
+        if (snapshot.hasData) {
+          return NestedScrollView(
+            physics: ClampingScrollPhysics(),
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  floating: false,
+                  pinned: false,
+                  title: Text('Food Buzz'),
+                ),
+              ];
+            },
+            body: ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+//                  return Padding(
+//                    padding: const EdgeInsets.all(8.0),
+//                    child: Column(
+//                      children: <Widget>[
+//                        snapshot.hasData
+//                            ? Text(
+//                                snapshot.data[index].name,
+//                                style: TextStyle(
+//                                    fontSize: 16,
+//                                    fontWeight: FontWeight.bold,
+//                                    fontFamily: 'Lato'),
+//                              )
+//                            : Container(
+//                                width: 200,
+//                                height: 18,
+//                                color: Colors.grey.withOpacity(0.85)),
+//                      ],
+//                    ),
+//                  );
+
+                  return PostItem(data: snapshot.data[index]);
+                }),
+          );
+        }
+
+        return Center(child: CircularProgressIndicator());
+      },
+    );
+  }
+}
+
+class _Profile extends StatefulWidget {
+  @override
+  __ProfileState createState() => __ProfileState();
+}
+
+class __ProfileState extends State<_Profile> {
+  @override
+  Widget build(BuildContext context) {
     return NestedScrollView(
       physics: ClampingScrollPhysics(),
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -166,81 +233,117 @@ class _UserProfileState extends State<UserProfile> {
       body: FutureBuilder(
         future: UserRepos().getProfile(),
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-          return ListView.builder(
-              itemCount: 7,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  return Stack(
-                    children: <Widget>[
-                      Container(height: 150),
-                      Container(
-                        color: Color(0XFFd22030),
-                        height: 94,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: (MediaQuery.of(context).size.width * 0.5) - 56,
-                        child: snapshot.hasData
-                            ? Container(
-                                width: 112.0,
-                                height: 112.0,
-                                decoration: new BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        fit: BoxFit.fill,
-                                        image: NetworkImage(snapshot
-                                                .data.picture
-                                                .contains('http')
-                                            ? snapshot.data.picture
-                                            : Constant.baseURLB +
-                                                snapshot.data.picture))),
-                              )
-                            : Container(
-                                width: 112.0,
-                                height: 112.0,
-                                decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.grey.withOpacity(0.85),
-                                ),
-                              ),
-                      )
-                    ],
-                  );
-                } else if (index == 1) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
+          if (snapshot.hasData) {
+            return ListView.builder(
+                itemCount: 3,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Stack(
                       children: <Widget>[
-                        snapshot.hasData
-                            ? Text(
-                                snapshot.data.name,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Lato'),
-                              )
-                            : Container(
-                                width: 200,
-                                height: 18,
-                                color: Colors.grey.withOpacity(0.85)),
+                        Container(height: 150),
+                        Container(
+                          color: Color(0XFFd22030),
+                          height: 94,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: (MediaQuery.of(context).size.width * 0.5) - 56,
+                          child: snapshot.hasData
+                              ? Container(
+                                  width: 112.0,
+                                  height: 112.0,
+                                  decoration: new BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          fit: BoxFit.fill,
+                                          image: NetworkImage(snapshot
+                                                  .data.picture
+                                                  .contains('http')
+                                              ? snapshot.data.picture
+                                              : Constant.baseURLB +
+                                                  snapshot.data.picture))),
+                                )
+                              : Container(
+                                  width: 112.0,
+                                  height: 112.0,
+                                  decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.withOpacity(0.85),
+                                  ),
+                                ),
+                        )
                       ],
-                    ),
+                    );
+                  } else if (index == 1) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: <Widget>[
+                          snapshot.hasData
+                              ? Text(
+                                  snapshot.data.name,
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Lato'),
+                                )
+                              : Container(
+                                  width: 200,
+                                  height: 18,
+                                  color: Colors.grey.withOpacity(0.85)),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: _FeedList(),
                   );
-                }
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PostItem(
-                      name: 'Samjhana Pokharel',
-                      img: TestData.getImageList()[index],
-                      ago: '2hrs ago'),
-                );
-              });
+                });
+          }
+
+          return CircularProgressIndicator();
         },
       ),
     );
   }
+}
 
-  Widget getRestaurantNearBy() {
+class _FeedList extends StatefulWidget {
+  @override
+  __FeedListState createState() => __FeedListState();
+}
+
+class __FeedListState extends State<_FeedList> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: UserRepos().myFeeds(),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<FeedItemModel>> snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                shrinkWrap: true,
+                physics: ClampingScrollPhysics(),
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return PostItem(data: snapshot.data[index]);
+                });
+          }
+          return Container();
+        });
+  }
+}
+
+class _NearByRestaurant extends StatefulWidget {
+  @override
+  __NearByRestaurantState createState() => __NearByRestaurantState();
+}
+
+class __NearByRestaurantState extends State<_NearByRestaurant> {
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder(
       future: UserRepos().getNearByRestaurant(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -279,7 +382,30 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
-  Widget getUserNearBy() {
+  List<_Restaurant> rawToRestaurantList(dynamic rawData) {
+    List<_Restaurant> restaurantList = [];
+
+    for (int i = 0; i < rawData.length; i++) {
+      restaurantList.add(_Restaurant(
+        id: rawData[i]['id'],
+        name: rawData[i]['name'],
+        picture: rawData[i]['picture'],
+        address: rawData[i]['address'],
+      ));
+    }
+
+    return restaurantList;
+  }
+}
+
+class _NearByUser extends StatefulWidget {
+  @override
+  __NearByUserState createState() => __NearByUserState();
+}
+
+class __NearByUserState extends State<_NearByUser> {
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder(
       future: UserRepos().getNearByUser(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -303,7 +429,7 @@ class _UserProfileState extends State<UserProfile> {
                 child: PersonItem(
                   name: userList[index].name,
                   img: userList[index].picture,
-                  isFollowing: false,
+                  isFollowing: userList[index].following,
                 ),
               );
             },
@@ -315,30 +441,15 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
-  List<_Restaurant> rawToRestaurantList(dynamic rawData) {
-    List<_Restaurant> restaurantList = [];
-
-    for (int i = 0; i < rawData.length; i++) {
-      restaurantList.add(_Restaurant(
-        id: rawData[i]['id'],
-        name: rawData[i]['name'],
-        picture: rawData[i]['picture'],
-        address: rawData[i]['address'],
-      ));
-    }
-
-    return restaurantList;
-  }
-
   List<_User> rawToUserList(dynamic rawData) {
     List<_User> userList = [];
 
     for (int i = 0; i < rawData.length; i++) {
       userList.add(_User(
-        id: rawData[i]['id'],
-        name: rawData[i]['name'],
-        picture: rawData[i]['picture'],
-      ));
+          id: rawData[i]['id'],
+          name: rawData[i]['name'],
+          picture: rawData[i]['picture'],
+          following: rawData[i]['following']));
     }
 
     return userList;
@@ -363,11 +474,12 @@ class _User {
   String id;
   String name;
   String picture;
+  bool following;
 
-  _User({this.id, this.name, this.picture});
+  _User({this.id, this.name, this.picture, this.following});
 
   @override
   String toString() {
-    return '{name: $name, picture: $picture}';
+    return '{name: $name, picture: $picture, following: $following}';
   }
 }

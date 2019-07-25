@@ -47,6 +47,10 @@ class Cart {
     this.restaurant_name,
   });
 
+  String toJSONString() {
+    return '{"product_id": $product_id,"restaurant_id": $restaurant_id,"unit_price": $unit_price,"product_count": $product_count}';
+  }
+
   dynamic toJSON() {
     return {
       'product_id': product_id,

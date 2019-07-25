@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:food_buzz/Database/Cart.dart';
 
 import 'package:food_buzz/Database/database.dart';
+import 'package:food_buzz/Repo/UserRepositories/UserRepos.dart';
 
 import '../const.dart';
 
@@ -30,6 +31,9 @@ class _CartItemState extends State<CartItem> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Cart'),
+      ),
       body: FutureBuilder<List<Cart>>(
         future: getDAO(),
         builder: (BuildContext context, var snapshot) {
@@ -40,12 +44,10 @@ class _CartItemState extends State<CartItem> {
               _totalPrice += cart.unit_price * cart.product_count;
             });
 
-            order(_totalPrice, snapshot.data);
-
             return Stack(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
+                  padding: const EdgeInsets.only(bottom: 98.0),
                   child: ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -74,11 +76,6 @@ class _CartItemState extends State<CartItem> {
                                 fontSize: 24,
                                 fontFamily: 'Lato'),
                           ),
-                          Container(
-                            width: 3,
-                            height: 64,
-                            color: Colors.white,
-                          ),
                           Text(
                             'Rs.' + _totalPrice.toInt().toString(),
                             style: TextStyle(
@@ -90,6 +87,23 @@ class _CartItemState extends State<CartItem> {
                         ],
                       ),
                     )),
+                Positioned(
+                  bottom: 44,
+                  right: (MediaQuery.of(context).size.width * 0.5) - 22,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      UserRepos()
+                          .order(order(_totalPrice, snapshot.data))
+                          .then((value) {
+                        setState(() {
+                          database.cartDao.clearCart();
+                          getDAO();
+                        });
+                      });
+                    },
+                    child: Icon(Icons.add, size: 32),
+                  ),
+                )
               ],
             );
           }
@@ -221,18 +235,32 @@ class _CartItemState extends State<CartItem> {
     );
   }
 
-  void order(double totalPrice, List<Cart> cartList) {
-    String toJSON = '{'
-        'total_price: $totalPrice,'
-        'food_items: [';
+  dynamic order(double totalPrice, List<Cart> cartList) {
+    var list = "[";
 
     cartList.forEach((cart) {
-      toJSON += cart.toJSON().toString() + ',';
+      list += cart.toJSONString() + ",";
     });
 
-    toJSON += '],}';
+    list = list.substring(0, list.length - 1);
+
+    list += "]";
+
+    dynamic toJSON = {'total_price': totalPrice.toString(), 'cart': list};
 
     print(toJSON);
+//
+//    dynamic cartJSON = {};
+//
+//    int i = 0;
+//    cartList.forEach((cartItem) {
+//      i++;
+//      cartJSON = {...cartJSON, i.toString(): cartItem.toJSON()};
+//    });
+//
+//    toJSON = {...toJSON, 'food_items': cartJSON};
+
+    return toJSON;
   }
 }
 
